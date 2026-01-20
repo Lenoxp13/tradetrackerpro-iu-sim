@@ -1,0 +1,4229 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeTracker Pro • Advanced Trading Journal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style type="text/tailwindcss">
+    /* Modern Theme Tokens */
+    [data-theme="dark"] {
+      --primary-color: #6366f1;
+      --primary-2: #818cf8;
+      --primary-glow: rgba(99, 102, 241, 0.15);
+      --secondary-color: #1e293b;
+      --background-color: #0f172a;
+      --surface: #1e293b;
+      --surface-elevated: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-color: #475569;
+      --danger-color: #ef4444;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --chart-background: rgba(99, 102, 241, 0.18);
+      --glass: rgba(30, 41, 59, 0.7);
+      --ring: rgba(99, 102, 241, 0.35);
+      --glass-success: rgba(16, 185, 129, 0.1);
+      --glass-danger: rgba(239, 68, 68, 0.1);
+      --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --gradient-2: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+      --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    [data-theme="light"] {
+      --primary-color: #4f46e5;
+      --primary-2: #6366f1;
+      --primary-glow: rgba(79, 70, 229, 0.1);
+      --secondary-color: #ffffff;
+      --background-color: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --accent-color: #e2e8f0;
+      --danger-color: #dc2626;
+      --success-color: #059669;
+      --warning-color: #d97706;
+      --chart-background: rgba(79, 70, 229, 0.12);
+      --glass: rgba(255, 255, 255, 0.8);
+      --ring: rgba(79, 70, 229, 0.35);
+      --glass-success: rgba(5, 150, 105, 0.1);
+      --glass-danger: rgba(220, 38, 38, 0.1);
+      --gradient-1: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      --gradient-2: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+      --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Base Styles with Anti-Copy Protection */
+    * { 
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: default;
+    }
+    
+    /* Allow text selection only in specific areas */
+    input, textarea, [contenteditable="true"] {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+      cursor: text;
+    }
+    
+    body { 
+      background: var(--background-color); 
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Overlay to prevent interactions */
+    .protection-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 99999;
+      pointer-events: none;
+    }
+
+    /* Protection message */
+    .protection-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 100000;
+      display: none;
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--danger-color);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    /* Rest of the styles remain the same */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--surface);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-color);
+    }
+
+    /* Glass Effects */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-elevated {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .animate-shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    .animate-slide-up {
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .animate-pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    /* Modern Components */
+    .card-modern {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-modern:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+
+    .card-elevated {
+      background: var(--surface-elevated);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-modern {
+      background: var(--gradient-1);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 28px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.01em;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .btn-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-modern:hover::before {
+      left: 100%;
+    }
+
+    .btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-modern:active {
+      transform: translateY(0);
+    }
+
+    .btn-outline-modern {
+      background: transparent;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-outline-modern:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+    }
+
+    .input-modern {
+      background: var(--surface);
+      border: 2px solid var(--accent-color);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      font-size: 15px;
+      transition: all 0.3s ease;
+      width: 100%;
+      cursor: text;
+    }
+
+    .input-modern:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: var(--surface-elevated);
+    }
+
+    .input-modern::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* Modern Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-success {
+      background: var(--glass-success);
+      color: var(--success-color);
+    }
+
+    .badge-danger {
+      background: var(--glass-danger);
+      color: var(--danger-color);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning-color);
+    }
+
+    .badge-neutral {
+      background: var(--primary-glow);
+      color: var(--primary-color);
+    }
+
+    /* Modern Tab System */
+    .tab-header {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      background: var(--surface);
+      border-radius: 18px;
+      margin-bottom: 32px;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tab-button:hover {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+    }
+
+    .tab-button.active {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Modern Stats Card */
+    .stat-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Modern Progress Block - Improved UI */
+    .progress-block {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%);
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-block::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-1);
+    }
+
+    .progress-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .progress-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .progress-subvalue {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .progress-bar-container {
+      height: 12px;
+      background: var(--surface);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--gradient-1);
+      border-radius: 6px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Modern Modal */
+    .modal-modern {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .modal-modern.open {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Modern Toast */
+    .toast-modern {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 16px 24px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      z-index: 9998;
+      transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 300px;
+    }
+
+    .toast-modern.show {
+      transform: translateX(0);
+    }
+
+    /* Modern Gradient Text */
+    .gradient-text {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Modern Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--accent-color) 25%, var(--surface-elevated) 50%, var(--accent-color) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 12px;
+    }
+
+    /* Modern Table */
+    .table-modern {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table-modern th {
+      background: var(--surface-elevated);
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .table-modern td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--accent-color);
+      transition: background 0.2s ease;
+    }
+
+    .table-modern tr:hover td {
+      background: var(--surface-elevated);
+    }
+
+    /* Rich Text Editor */
+    .rich-text-toolbar {
+      display: flex;
+      gap: 4px;
+      padding: 8px;
+      background: var(--surface-elevated);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rt-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--accent-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+    }
+
+    .rt-btn:hover {
+      background: var(--accent-color);
+      color: var(--text-primary);
+    }
+
+    .rt-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .rich-text-editor {
+      min-height: 100px;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--accent-color);
+      border-radius: 12px;
+      outline: none;
+      overflow-y: auto;
+    }
+
+    .rich-text-editor:focus {
+      border-color: var(--primary-color);
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+      .tab-header {
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+      }
+      
+      .tab-button {
+        width: 100%;
+        padding: 14px;
+      }
+      
+      .modal-content {
+        margin: 16px;
+        border-radius: 20px;
+      }
+      
+      .toast-modern {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        min-width: auto;
+      }
+      
+      .table-modern {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .progress-block {
+        padding: 24px;
+      }
+      
+      .progress-value {
+        font-size: 28px;
+      }
+    }
+
+    /* Hover Effects */
+    .hover-lift {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Focus Styles */
+    .focus-ring:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /* Trading Cards */
+    .trade-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .trade-card.win {
+      border-left: 4px solid var(--success-color);
+      background: linear-gradient(135deg, var(--surface) 0%, var(--glass-success) 100%);
+    }
+
+    .trade-card.loss {
+      border-left: 4px solid var(--danger-color);
+      background: linear-gradient(135deg, var(--surface) 0%, var(--glass-danger) 100%);
+    }
+
+    /* Chart Container - Improved for better scaling */
+    .chart-container {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow-sm);
+      height: 400px;
+      position: relative;
+    }
+
+    .chart-container-sm {
+      height: 300px;
+    }
+
+    /* Chart Controls */
+    .chart-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chart-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--accent-color);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chart-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Trade Recording Block */
+    .trade-recording-block {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%);
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .trade-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .trade-action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Target Indicator */
+    .target-indicator {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--primary-glow);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-top: 8px;
+    }
+
+    /* Scenario Buttons */
+    .scenario-button {
+      padding: 12px 20px;
+      border: 2px solid;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .scenario-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .scenario-button.safe {
+      border-color: var(--success-color);
+      color: var(--success-color);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .scenario-button.safe:hover {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .scenario-button.moderate {
+      border-color: var(--warning-color);
+      color: var(--warning-color);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .scenario-button.moderate:hover {
+      background: var(--warning-color);
+      color: white;
+    }
+
+    .scenario-button.aggressive {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .scenario-button.aggressive:hover {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .scenario-button.extreme {
+      border-color: #8b5cf6;
+      color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .scenario-button.extreme:hover {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    /* Setup Actions */
+    .setup-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-[var(--background-color)] to-slate-950 min-h-screen">
+  <!-- Protection Overlay -->
+  <div class="protection-overlay" id="protectionOverlay"></div>
+  
+  <!-- Protection Message -->
+  <div class="protection-message" id="protectionMessage">
+    <i class="fas fa-shield-alt text-3xl mb-4 text-[var(--primary-color)]"></i>
+    <h3 class="text-xl font-bold mb-2">Content Protected</h3>
+    <p class="text-sm mb-4">This content is protected and cannot be copied.</p>
+    <button onclick="hideProtectionMessage()" class="btn-modern px-6 py-2 text-sm">
+      OK
+    </button>
+  </div>
+
+  <!-- Background Elements -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--primary-color)]/10 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--primary-color)]/5 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[var(--primary-color)]/5 via-transparent to-[var(--primary-color)]/5 blur-3xl"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="relative z-10 min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-50 glass-elevated border-b border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="h-20 flex items-center justify-between">
+          <!-- Logo -->
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--primary-color)] to-purple-600 flex items-center justify-center shadow-lg">
+                <i class="fas fa-chart-line text-white text-xl"></i>
+              </div>
+              <div class="absolute -top-1 -right-1 w-5 h-5 bg-[var(--success-color)] rounded-full border-4 border-[var(--surface)]"></div>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                TradeTracker <span class="text-[var(--primary-color)]">Pro</span>
+              </h1>
+              <p class="text-xs text-[var(--text-secondary)] mt-1">Advanced Trading Intelligence</p>
+            </div>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center gap-2">
+            <button onclick="showTab('trackerTab')" class="tab-button active">
+              <i class="fas fa-dashboard"></i>
+              Dashboard
+            </button>
+            <button onclick="showTab('tradeHistoryTab')" class="tab-button">
+              <i class="fas fa-history"></i>
+              Trades
+            </button>
+            <button onclick="showTab('tradeJournalTab')" class="tab-button">
+              <i class="fas fa-book"></i>
+              Journal
+            </button>
+            <button onclick="showTab('reportTab')" class="tab-button">
+              <i class="fas fa-chart-pie"></i>
+              Reports
+            </button>
+            <button onclick="showTab('scenarioTab')" class="tab-button">
+              <i class="fas fa-flask"></i>
+              Simulator
+            </button>
+          </nav>
+
+          <!-- Right Controls -->
+          <div class="flex items-center gap-3">
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="w-12 h-12 rounded-xl glass flex items-center justify-center hover-lift focus-ring">
+              <i id="themeIcon" class="fas fa-moon text-[var(--primary-color)] text-lg"></i>
+            </button>
+
+            <!-- User Menu -->
+            <div class="relative group">
+              <button class="w-12 h-12 rounded-xl glass flex items-center justify-center hover-lift focus-ring">
+                <i class="fas fa-user text-[var(--text-secondary)] text-lg"></i>
+              </button>
+              <div class="absolute right-0 top-full mt-2 w-48 glass-elevated rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <button class="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 text-sm">
+                  <i class="fas fa-user-circle mr-3"></i>Profile
+                </button>
+                <button class="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 text-sm">
+                  <i class="fas fa-cog mr-3"></i>Settings
+                </button>
+                <button onclick="exportData()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 text-sm">
+                  <i class="fas fa-download mr-3"></i>Export Data
+                </button>
+              </div>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobileMenuBtn" class="md:hidden w-12 h-12 rounded-xl glass flex items-center justify-center hover-lift focus-ring">
+              <i class="fas fa-bars text-[var(--text-secondary)] text-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <div id="mobileNav" class="md:hidden hidden glass-elevated border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="showTab('trackerTab')" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-dashboard text-xl mb-2"></i>
+              <span class="text-xs font-medium">Dashboard</span>
+            </button>
+            <button onclick="showTab('tradeHistoryTab')" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-history text-xl mb-2"></i>
+              <span class="text-xs font-medium">Trades</span>
+            </button>
+            <button onclick="showTab('tradeJournalTab')" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-book text-xl mb-2"></i>
+              <span class="text-xs font-medium">Journal</span>
+            </button>
+            <button onclick="showTab('reportTab')" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-chart-pie text-xl mb-2"></i>
+              <span class="text-xs font-medium">Reports</span>
+            </button>
+            <button onclick="showTab('scenarioTab')" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-flask text-xl mb-2"></i>
+              <span class="text-xs font-medium">Simulator</span>
+            </button>
+            <button onclick="showSystemModal()" class="flex flex-col items-center justify-center py-4 rounded-xl hover:bg-white/5 transition-all">
+              <i class="fas fa-cog text-xl mb-2"></i>
+              <span class="text-xs font-medium">Systems</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+      <!-- Hero Section -->
+      <section class="relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+          <div class="text-center mb-12 animate-slide-up">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+              <span class="gradient-text">Master Your Trading</span>
+              <br>
+              <span class="text-[var(--text-primary)]">Journey with Intelligence</span>
+            </h1>
+            <p class="text-xl text-[var(--text-secondary)] max-w-3xl mx-auto mb-10">
+              Advanced trading journal with AI-powered insights, multi-strategy simulation, 
+              and professional reporting tools for serious traders.
+            </p>
+            <div class="flex flex-wrap gap-4 justify-center">
+              <button onclick="showTab('trackerTab')" class="btn-modern px-10 py-5 text-lg">
+                <i class="fas fa-play mr-3"></i>
+                Start Tracking Now
+              </button>
+              <button onclick="showDemo()" class="btn-outline-modern px-10 py-5 text-lg">
+                <i class="fas fa-play-circle mr-3"></i>
+                Watch Demo
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="dashboard-grid mb-12 animate-slide-up" style="animation-delay: 0.1s;">
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <p class="text-sm text-[var(--text-secondary)] mb-2">Current Balance</p>
+                  <h3 id="currentBalance" class="text-3xl font-bold">$10,000.00</h3>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                  <i class="fas fa-wallet text-white text-xl"></i>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="balanceBadge" class="badge badge-neutral">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  Start trading to see profit
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <p class="text-sm text-[var(--text-secondary)] mb-2">Win Rate</p>
+                  <h3 id="winRate" class="text-3xl font-bold">0%</h3>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                  <i class="fas fa-trophy text-white text-xl"></i>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="winRateBadge" class="badge badge-neutral">
+                  <i class="fas fa-chart-line mr-2"></i>
+                  No trades recorded
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <p class="text-sm text-[var(--text-secondary)] mb-2">Profit Factor</p>
+                  <h3 id="profitFactor" class="text-3xl font-bold">0.00</h3>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                  <i class="fas fa-scale-balanced text-white text-xl"></i>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="profitFactorBadge" class="badge badge-neutral">
+                  <i class="fas fa-calculator mr-2"></i>
+                  Calculate after trades
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <p class="text-sm text-[var(--text-secondary)] mb-2">Expectancy</p>
+                  <h3 id="expectancy" class="text-3xl font-bold">$0.00</h3>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                  <i class="fas fa-bullseye text-white text-xl"></i>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge badge-neutral">
+                  <i class="fas fa-calculator mr-2"></i>
+                  Per trade average
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Selector -->
+          <div class="card-modern p-6 mb-8 animate-slide-up" style="animation-delay: 0.2s;">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold mb-2">Trading System</h3>
+                <p class="text-sm text-[var(--text-secondary)]">Select or create a trading system to manage your strategies</p>
+              </div>
+              <div class="flex gap-3">
+                <select id="systemSelect" onchange="switchSystem(this.value)" class="input-modern flex-1 min-w-[200px]">
+                  <option value="default">Default System</option>
+                </select>
+                <button onclick="showSystemModal()" class="btn-modern px-6">
+                  <i class="fas fa-plus mr-2"></i>
+                  New System
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab Content -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <!-- Dashboard Tab -->
+        <section id="trackerTab" class="tab-content animate-fade-in">
+          <!-- Trading Setup -->
+          <div class="card-modern p-8 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+              <div>
+                <h2 class="text-2xl font-bold mb-2">Trading Setup</h2>
+                <p class="text-sm text-[var(--text-secondary)]">Configure your trading parameters and manage data</p>
+              </div>
+              <div class="setup-actions mt-4 md:mt-0">
+                <button onclick="showResetConfirmation()" class="btn-modern bg-gradient-to-r from-amber-500 to-orange-600">
+                  <i class="fas fa-redo mr-2"></i>
+                  Reset All
+                </button>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div>
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Starting Balance ($)</label>
+                <input id="startingBalance" type="number" value="10000" min="1" class="input-modern">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Target Balance ($)</label>
+                <input id="targetBalance" type="number" value="10800" min="1" class="input-modern">
+                <div class="target-indicator mt-2">
+                  <i class="fas fa-bullseye mr-2"></i>
+                  Target: +8%
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Risk (%)</label>
+                <input id="riskPercent" type="number" value="1" min="0.1" max="100" step="0.1" class="input-modern">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Reward (%)</label>
+                <input id="rewardPercent" type="number" value="2" min="0.1" max="100" step="0.1" class="input-modern">
+              </div>
+            </div>
+            <button onclick="initTrading()" class="btn-modern px-10">
+              <i class="fas fa-play-circle mr-3"></i>
+              Initialize Trading
+            </button>
+          </div>
+
+          <!-- Progress & Trading -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Improved Progress Block -->
+            <div class="lg:col-span-2">
+              <div class="progress-block">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                  <div>
+                    <div class="progress-label">Progress to Target</div>
+                    <div class="progress-value" id="progressPercent">0%</div>
+                    <div class="progress-subvalue">
+                      <span id="targetProgress">$0</span> to reach target
+                    </div>
+                  </div>
+                  <div class="mt-4 md:mt-0">
+                    <div class="text-right">
+                      <div class="text-sm text-[var(--text-secondary)]">Current Balance</div>
+                      <div class="text-2xl font-bold" id="progressCurrentBalance">$10,000.00</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="progress-bar-container">
+                  <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex justify-between text-sm text-[var(--text-secondary)] mt-2">
+                  <div>
+                    <i class="fas fa-flag-start mr-1"></i>
+                    Start: <span id="progressStartBalance">$10,000.00</span>
+                  </div>
+                  <div>
+                    <i class="fas fa-flag-checkered mr-1"></i>
+                    Target: <span id="progressTargetBalance">$10,800.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trade Recording Block with Import Button -->
+            <div class="trade-recording-block">
+              <h3 class="text-xl font-bold mb-6">Trade Recording</h3>
+              <div id="tradeControls" class="space-y-4" style="display: none;">
+                <div class="trade-buttons">
+                  <button onclick="recordTrade('win')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-5 rounded-2xl font-semibold text-lg hover-lift transition-all hover:shadow-xl">
+                    <i class="fas fa-check-circle mr-3"></i>
+                    Record Win (TP)
+                  </button>
+                  <button onclick="recordTrade('loss')" class="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white py-5 rounded-2xl font-semibold text-lg hover-lift transition-all hover:shadow-xl">
+                    <i class="fas fa-times-circle mr-3"></i>
+                    Record Loss (SL)
+                  </button>
+                </div>
+                
+                <div class="trade-action-buttons">
+                  <button onclick="importData()" class="btn-outline-modern py-3">
+                    <i class="fas fa-upload mr-2"></i>
+                    Import
+                  </button>
+                  <button onclick="exportData()" class="btn-modern py-3">
+                    <i class="fas fa-download mr-2"></i>
+                    Export
+                  </button>
+                </div>
+                
+                <div class="text-center mt-4">
+                  <div class="text-xs text-[var(--text-secondary)]">
+                    <i class="fas fa-keyboard mr-1"></i>
+                    Shortcuts: Ctrl+Shift+W (Win) / Ctrl+Shift+L (Loss)
+                  </div>
+                </div>
+              </div>
+              <div id="initPrompt" class="text-center py-12">
+                <i class="fas fa-play-circle text-4xl text-[var(--text-secondary)] mb-4"></i>
+                <p class="text-[var(--text-secondary)] mb-4">Initialize trading to start recording</p>
+                <button onclick="initTrading()" class="btn-outline-modern px-6 py-2">
+                  <i class="fas fa-play mr-2"></i>
+                  Initialize First
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Metrics -->
+          <div class="card-modern p-8 mb-8">
+            <h3 class="text-xl font-bold mb-6">Advanced Performance Metrics</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Max Drawdown</div>
+                <div id="maxDrawdown" class="text-2xl font-bold">0%</div>
+              </div>
+              <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Recovery Factor</div>
+                <div id="recoveryFactor" class="text-2xl font-bold">0.00</div>
+              </div>
+              <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Consecutive Wins</div>
+                <div id="consecutiveWins" class="text-2xl font-bold">0</div>
+              </div>
+              <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Consecutive Losses</div>
+                <div id="consecutiveLosses" class="text-2xl font-bold">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="card-modern p-6 text-center">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Total Trades</div>
+              <div id="totalTrades" class="text-2xl font-bold">0</div>
+            </div>
+            <div class="card-modern p-6 text-center">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Wins</div>
+              <div id="winsCount" class="text-2xl font-bold text-green-500">0</div>
+            </div>
+            <div class="card-modern p-6 text-center">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Losses</div>
+              <div id="lossesCount" class="text-2xl font-bold text-red-500">0</div>
+            </div>
+            <div class="card-modern p-6 text-center">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Estimated to Target</div>
+              <div id="estimatedTrades" class="text-2xl font-bold">—</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Trade History Tab -->
+        <section id="tradeHistoryTab" class="tab-content hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-6">Trade History</h2>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div class="card-modern p-6">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Total Trades</div>
+                <div id="sumTotal" class="text-2xl font-bold">0</div>
+              </div>
+              <div class="card-modern p-6">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Wins</div>
+                <div id="sumWins" class="text-2xl font-bold text-green-500">0</div>
+              </div>
+              <div class="card-modern p-6">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Losses</div>
+                <div id="sumLosses" class="text-2xl font-bold text-red-500">0</div>
+              </div>
+              <div class="card-modern p-6">
+                <div class="text-sm text-[var(--text-secondary)] mb-2">Net P/L</div>
+                <div id="sumPnL" class="text-2xl font-bold">$0.00</div>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card-modern p-6 mb-8">
+              <div class="flex flex-col md:flex-row gap-4 items-center">
+                <select id="filterType" class="input-modern flex-1">
+                  <option value="all">All Trades</option>
+                  <option value="win">Wins Only</option>
+                  <option value="loss">Losses Only</option>
+                </select>
+                <input id="filterFrom" type="date" class="input-modern flex-1">
+                <input id="filterTo" type="date" class="input-modern flex-1">
+                <button onclick="applyFilters()" class="btn-modern px-6">
+                  <i class="fas fa-filter mr-2"></i>
+                  Apply
+                </button>
+                <button onclick="clearFilters()" class="btn-outline-modern px-6">
+                  <i class="fas fa-times mr-2"></i>
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Chart with Controls -->
+            <div class="chart-container mb-8">
+              <div class="chart-controls">
+                <button onclick="zoomChart('balanceChart', 'in')" class="chart-btn" title="Zoom In">
+                  <i class="fas fa-search-plus"></i>
+                </button>
+                <button onclick="zoomChart('balanceChart', 'out')" class="chart-btn" title="Zoom Out">
+                  <i class="fas fa-search-minus"></i>
+                </button>
+                <button onclick="resetZoomChart('balanceChart')" class="chart-btn" title="Reset Zoom">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="balanceChart" aria-label="Balance Over Time"></canvas>
+            </div>
+
+            <!-- Trade List -->
+            <div class="card-modern overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="table-modern">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Type</th>
+                      <th>Date</th>
+                      <th>Balance Before</th>
+                      <th>P/L</th>
+                      <th>Balance After</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tradeHistoryBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Journal Tab -->
+        <section id="tradeJournalTab" class="tab-content hidden">
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-6">Trade Journal</h2>
+            
+            <div class="card-modern overflow-hidden mb-8">
+              <div class="overflow-x-auto">
+                <table class="table-modern">
+                  <thead>
+                    <tr>
+                      <th>Trade #</th>
+                      <th>Type</th>
+                      <th>Date & Time</th>
+                      <th>Balance Before</th>
+                      <th>Risk/Reward</th>
+                      <th>Balance After</th>
+                      <th>Screenshot</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="journalBody">
+                    <!-- Journal entries will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reports Tab -->
+        <section id="reportTab" class="tab-content hidden">
+          <h2 class="text-2xl font-bold mb-6">Reports & Analytics</h2>
+          
+          <div class="card-modern p-8 mb-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+              <div>
+                <h3 class="text-xl font-bold mb-2">Generate Monthly Report</h3>
+                <p class="text-[var(--text-secondary)]">Select a month to generate detailed performance report</p>
+              </div>
+              <div class="flex gap-4">
+                <input type="month" id="reportCalendar" class="input-modern">
+                <button onclick="generateReport()" class="btn-modern px-8">
+                  <i class="fas fa-chart-bar mr-2"></i>
+                  Generate Report
+                </button>
+              </div>
+            </div>
+
+            <div id="reportResult" class="mb-8"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div class="chart-container chart-container-sm">
+                <canvas id="reportPie"></canvas>
+              </div>
+              <div class="chart-container chart-container-sm">
+                <canvas id="reportBar"></canvas>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 justify-center">
+              <button onclick="downloadPDF()" class="btn-modern px-8">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Download PDF
+              </button>
+              <button onclick="downloadXLSX()" class="btn-outline-modern px-8">
+                <i class="fas fa-file-excel mr-2"></i>
+                Download Excel
+              </button>
+              <button onclick="generateInsights()" class="btn-outline-modern px-8">
+                <i class="fas fa-brain mr-2"></i>
+                AI Insights
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Simulator Tab -->
+        <section id="scenarioTab" class="tab-content hidden">
+          <h2 class="text-2xl font-bold mb-6">Scenario Simulator</h2>
+          
+          <div class="card-modern p-8 mb-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                <i class="fas fa-flask text-white text-xl"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">Risk/Reward Scenario Analysis</h3>
+                <p class="text-[var(--text-secondary)]">Simulate different starting balances and risk/reward ratios using your trade history</p>
+              </div>
+            </div>
+
+            <!-- Trade Sequence Info -->
+            <div class="card-modern p-6 mb-8 bg-gradient-to-br from-slate-800 to-slate-900">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div class="text-sm text-[var(--text-secondary)] mb-2">Trades Recorded</div>
+                  <div id="tradeCountDisplay" class="text-2xl font-bold">0</div>
+                </div>
+                <div>
+                  <div class="text-sm text-[var(--text-secondary)] mb-2">Win Rate</div>
+                  <div id="winRateDisplay" class="text-2xl font-bold">0%</div>
+                </div>
+                <div>
+                  <div class="text-sm text-[var(--text-secondary)] mb-2">Sequence</div>
+                  <div id="sequenceSource" class="text-lg font-semibold">Recorded Trades</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scenario Inputs -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <!-- Original Scenario -->
+              <div class="card-modern p-6 border-l-4 border-[var(--primary-color)]">
+                <h4 class="text-lg font-bold mb-4 text-[var(--primary-color)]">
+                  <i class="fas fa-database mr-2"></i>
+                  Original Parameters
+                </h4>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm text-[var(--text-secondary)] mb-2">Starting Balance</label>
+                    <input id="originalStartBalance" type="number" value="10000" class="input-modern" readonly>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm text-[var(--text-secondary)] mb-2">Risk %</label>
+                      <input id="originalRisk" type="number" value="1" class="input-modern" readonly>
+                    </div>
+                    <div>
+                      <label class="block text-sm text-[var(--text-secondary)] mb-2">Reward %</label>
+                      <input id="originalReward" type="number" value="2" class="input-modern" readonly>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm text-[var(--text-secondary)] mb-2">Final Balance</label>
+                    <div class="input-modern bg-gradient-to-r from-slate-800 to-slate-900 font-bold text-lg">
+                      $<span id="originalFinalBalance">10,000.00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Simulated Scenario -->
+              <div class="card-modern p-6 border-l-4 border-[var(--success-color)]">
+                <h4 class="text-lg font-bold mb-4 text-[var(--success-color)]">
+                  <i class="fas fa-sliders mr-2"></i>
+                  Simulation Parameters
+                </h4>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm text-[var(--text-secondary)] mb-2">Start Balance ($)</label>
+                    <input id="simulatedStartBalance" type="number" value="100" min="1" class="input-modern">
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm text-[var(--text-secondary)] mb-2">Risk %</label>
+                      <input id="simulateRisk" type="number" value="15" min="0.1" max="100" step="0.1" class="input-modern">
+                    </div>
+                    <div>
+                      <label class="block text-sm text-[var(--text-secondary)] mb-2">Reward %</label>
+                      <input id="simulateReward" type="number" value="30" min="0.1" max="100" step="0.1" class="input-modern">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm text-[var(--text-secondary)] mb-2">Final Balance</label>
+                    <div class="input-modern bg-gradient-to-r from-slate-800 to-slate-900 font-bold text-lg">
+                      $<span id="simulatedFinalBalance">-</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Improved Quick Scenarios -->
+            <div class="card-modern p-6 mb-8">
+              <h4 class="text-lg font-bold mb-4">Quick Scenarios</h4>
+              <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                <button onclick="setScenario(1, 2)" class="scenario-button safe">
+                  1% / 2%
+                </button>
+                <button onclick="setScenario(2, 4)" class="scenario-button safe">
+                  2% / 4%
+                </button>
+                <button onclick="setScenario(3, 6)" class="scenario-button safe">
+                  3% / 6%
+                </button>
+                <button onclick="setScenario(5, 10)" class="scenario-button moderate">
+                  5% / 10%
+                </button>
+                <button onclick="setScenario(10, 20)" class="scenario-button moderate">
+                  10% / 20%
+                </button>
+                <button onclick="setScenario(15, 30)" class="scenario-button aggressive">
+                  15% / 30%
+                </button>
+                <button onclick="setScenario(20, 40)" class="scenario-button aggressive">
+                  20% / 40%
+                </button>
+                <button onclick="setScenario(25, 50)" class="scenario-button aggressive">
+                  25% / 50%
+                </button>
+                <button onclick="setScenario(30, 60)" class="scenario-button extreme">
+                  30% / 60%
+                </button>
+                <button onclick="setScenario(40, 80)" class="scenario-button extreme">
+                  40% / 80%
+                </button>
+                <button onclick="setScenario(50, 100)" class="scenario-button extreme">
+                  50% / 100%
+                </button>
+                <button onclick="setScenario(75, 150)" class="scenario-button extreme">
+                  75% / 150%
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 mb-8">
+              <button onclick="runSimulation()" class="btn-modern px-8">
+                <i class="fas fa-play mr-2"></i>
+                Run Simulation
+              </button>
+              <button onclick="saveScenario()" class="btn-outline-modern px-8">
+                <i class="fas fa-save mr-2"></i>
+                Save Scenario
+              </button>
+              <button onclick="compareScenarios()" class="btn-outline-modern px-8">
+                <i class="fas fa-chart-line mr-2"></i>
+                Compare All
+              </button>
+              <button onclick="resetSimulation()" class="btn-outline-modern px-8">
+                <i class="fas fa-redo mr-2"></i>
+                Reset
+              </button>
+            </div>
+
+            <!-- Results -->
+            <div id="simulationResults" class="hidden">
+              <div class="card-modern p-8 mb-8">
+                <h4 class="text-xl font-bold mb-6">Simulation Results</h4>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div class="text-sm text-[var(--text-secondary)] mb-2">Final Balance</div>
+                    <div id="simFinalBalance" class="text-2xl font-bold">-</div>
+                  </div>
+                  <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div class="text-sm text-[var(--text-secondary)] mb-2">Total P&L</div>
+                    <div id="simTotalPL" class="text-2xl font-bold">-</div>
+                  </div>
+                  <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div class="text-sm text-[var(--text-secondary)] mb-2">Win Rate</div>
+                    <div id="simWinRate" class="text-2xl font-bold">-</div>
+                  </div>
+                  <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div class="text-sm text-[var(--text-secondary)] mb-2">Profit Factor</div>
+                    <div id="simProfitFactor" class="text-2xl font-bold">-</div>
+                  </div>
+                </div>
+
+                <div class="chart-container mb-8">
+                  <canvas id="simulationChart" height="350"></canvas>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div class="card-modern p-6">
+                    <h5 class="text-lg font-bold mb-4 text-[var(--primary-color)]">Original Scenario</h5>
+                    <div class="space-y-3">
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Start Balance:</span>
+                        <span class="font-bold">$<span id="originalStartBalanceDisplay">10,000.00</span></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Risk/Reward:</span>
+                        <span class="font-bold"><span id="originalRiskDisplay">1</span>% / <span id="originalRewardDisplay">2</span>%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Final Balance:</span>
+                        <span class="font-bold text-[var(--primary-color)]">$<span id="originalFinalResult">10,000.00</span></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Total P&L:</span>
+                        <span class="font-bold">$<span id="originalTotalPL">0.00</span></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-modern p-6">
+                    <h5 class="text-lg font-bold mb-4 text-[var(--success-color)]">Simulated Scenario</h5>
+                    <div class="space-y-3">
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Start Balance:</span>
+                        <span class="font-bold">$<span id="simStartBalanceDisplay">100.00</span></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Risk/Reward:</span>
+                        <span class="font-bold"><span id="simRiskDisplay">15</span>% / <span id="simRewardDisplay">30</span>%</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Final Balance:</span>
+                        <span class="font-bold text-[var(--success-color)]">$<span id="simFinalResult">-</span></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[var(--text-secondary)]">Total P&L:</span>
+                        <span class="font-bold">$<span id="simulatedTotalPL">-</span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-white/5 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary-color)] to-purple-600 flex items-center justify-center">
+              <i class="fas fa-chart-line text-white"></i>
+            </div>
+            <div>
+              <div class="font-bold">TradeTracker Pro</div>
+              <div class="text-sm text-[var(--text-secondary)]">Advanced Trading Intelligence</div>
+            </div>
+          </div>
+          <div class="text-sm text-[var(--text-secondary)] text-center md:text-right">
+            <p>Note: Calculations are based on your specified risk and reward percentages.</p>
+            <p class="mt-1">This tool is for educational purposes only. Past performance does not guarantee future results.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-modern" role="alert"></div>
+
+  <!-- Modals -->
+  <div id="resetModal" class="modal-modern">
+    <div class="modal-content p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Confirm Reset</h3>
+        <button onclick="closeModal('resetModal')" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <p class="text-[var(--text-secondary)] mb-8">Are you sure you want to reset all trading data? This action cannot be undone.</p>
+      <div class="flex gap-4">
+        <button onclick="resetTrading()" class="btn-modern bg-gradient-to-r from-red-500 to-pink-600 flex-1">
+          Yes, Reset Data
+        </button>
+        <button onclick="closeModal('resetModal')" class="btn-outline-modern flex-1">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="importModal" class="modal-modern">
+    <div class="modal-content p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Import Trading Data</h3>
+        <button onclick="closeModal('importModal')" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Upload JSON File</label>
+          <input type="file" id="importFile" accept="application/json" class="input-modern">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">Or Paste Data</label>
+          <textarea id="importDataText" rows="6" class="input-modern" placeholder='Paste your JSON data here...'></textarea>
+        </div>
+        <div class="flex gap-4 pt-4">
+          <button onclick="processImport()" class="btn-modern flex-1">
+            <i class="fas fa-upload mr-2"></i>
+            Import Data
+          </button>
+          <button onclick="closeModal('importModal')" class="btn-outline-modern flex-1">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Management Modal -->
+  <div id="systemModal" class="modal-modern">
+    <div class="modal-content p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Manage Trading Systems</h3>
+        <button onclick="closeModal('systemModal')" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-[var(--text-secondary)] mb-3">System Name</label>
+          <input id="systemName" type="text" placeholder="Enter system name" class="input-modern">
+        </div>
+        <button onclick="addSystem()" class="btn-modern w-full">
+          <i class="fas fa-plus mr-2"></i>
+          Add New System
+        </button>
+        
+        <div class="pt-6 border-t border-white/10">
+          <h4 class="text-lg font-bold mb-4">Existing Systems</h4>
+          <div id="systemList" class="space-y-3">
+            <!-- Systems will be listed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario Comparison Modal -->
+  <div id="scenarioModal" class="modal-modern">
+    <div class="modal-content p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Scenario Comparison</h3>
+        <button onclick="closeModal('scenarioModal')" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-6">
+        <div class="flex gap-4">
+          <button onclick="addNewScenario()" class="btn-modern">
+            <i class="fas fa-plus mr-2"></i>
+            Add Custom
+          </button>
+          <button onclick="exportAllScenarios()" class="btn-outline-modern">
+            <i class="fas fa-download mr-2"></i>
+            Export All
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Start Balance</th>
+                <th>Risk/Reward</th>
+                <th>Final Balance</th>
+                <th>Total P&L</th>
+                <th>Win Rate</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="scenarioComparisonTable">
+              <!-- Scenarios will be listed here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screenshot Modal -->
+  <div id="screenshotModal" class="modal-modern">
+    <div class="modal-content p-8 max-w-4xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Screenshot Preview</h3>
+        <button onclick="closeModal('screenshotModal')" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-6">
+        <img id="modalScreenshot" src="" alt="Trade Screenshot" class="w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/10">
+        <div>
+          <h4 class="font-medium mb-2">Trade Notes:</h4>
+          <div id="modalTradeNote" class="p-4 rounded-xl bg-white/5 text-[var(--text-secondary)]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== PROTECTION LAYER ======
+    // Anti-copy and protection measures
+    (function() {
+      'use strict';
+      
+      // Protection configuration
+      const protection = {
+        enabled: true,
+        maxAttempts: 3,
+        attempts: 0,
+        blockedKeys: [
+          'F12',           // Developer tools
+          'Control+U',     // View source
+          'Control+Shift+I', // Developer tools
+          'Control+Shift+J', // Developer tools
+          'Control+Shift+C', // Element inspector
+          'Control+S',     // Save page
+          'Control+P'      // Print
+        ],
+        protectionMessage: document.getElementById('protectionMessage'),
+        overlay: document.getElementById('protectionOverlay')
+      };
+      
+      // Function to show protection message
+      function showProtectionMessage(message = 'Content is protected') {
+        if (protection.protectionMessage) {
+          protection.protectionMessage.querySelector('p').textContent = message;
+          protection.protectionMessage.style.display = 'block';
+          setTimeout(hideProtectionMessage, 3000);
+        }
+      }
+      
+      // Function to hide protection message
+      function hideProtectionMessage() {
+        if (protection.protectionMessage) {
+          protection.protectionMessage.style.display = 'none';
+        }
+      }
+      
+      // Block right-click
+      document.addEventListener('contextmenu', function(e) {
+        if (protection.enabled) {
+          e.preventDefault();
+          showProtectionMessage('Right-click is disabled');
+          return false;
+        }
+      });
+      
+      // Block keyboard shortcuts for dev tools
+      document.addEventListener('keydown', function(e) {
+        if (!protection.enabled) return;
+        
+        // Check for blocked key combinations
+        const keyCombo = [
+          e.ctrlKey ? 'Control+' : '',
+          e.shiftKey ? 'Shift+' : '',
+          e.altKey ? 'Alt+' : '',
+          e.key
+        ].filter(Boolean).join('');
+        
+        if (protection.blockedKeys.includes(e.key) || 
+            protection.blockedKeys.includes(keyCombo)) {
+          e.preventDefault();
+          e.stopPropagation();
+          showProtectionMessage('This action is restricted');
+          protection.attempts++;
+          
+          if (protection.attempts >= protection.maxAttempts) {
+            document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;color:white;text-align:center;"><div><h1>Access Restricted</h1><p>Too many suspicious attempts detected.</p></div></div>';
+            return false;
+          }
+        }
+      });
+      
+      // Prevent text selection
+      document.addEventListener('selectstart', function(e) {
+        if (protection.enabled && !e.target.closest('input') && !e.target.closest('textarea')) {
+          e.preventDefault();
+          showProtectionMessage('Text selection is disabled');
+          return false;
+        }
+      });
+      
+      // Prevent drag and drop of images and other elements
+      document.addEventListener('dragstart', function(e) {
+        if (protection.enabled) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // Prevent copying
+      document.addEventListener('copy', function(e) {
+        if (protection.enabled) {
+          e.preventDefault();
+          showProtectionMessage('Copying is disabled');
+          return false;
+        }
+      });
+      
+      // Prevent cut
+      document.addEventListener('cut', function(e) {
+        if (protection.enabled) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // Prevent paste
+      document.addEventListener('paste', function(e) {
+        if (protection.enabled && !e.target.closest('input') && !e.target.closest('textarea')) {
+          e.preventDefault();
+          showProtectionMessage('Pasting is disabled here');
+          return false;
+        }
+      });
+      
+      // Block developer tools detection (basic)
+      const devtools = /./;
+      devtools.toString = function() {
+        showProtectionMessage('Developer tools detected');
+        return '';
+      };
+      
+      // Console warning
+      console.log('%c⚠️ WARNING ⚠️', 'color: red; font-size: 24px; font-weight: bold;');
+      console.log('%cThis is a protected application. Any attempt to copy or modify the code is prohibited.', 'color: orange; font-size: 14px;');
+      
+      // Expose protection functions to window
+      window.showProtectionMessage = showProtectionMessage;
+      window.hideProtectionMessage = hideProtectionMessage;
+    })();
+    
+    // ====== Modern State Management ======
+    const state = {
+      currentBalance: 10000,
+      startingBalance: 10000,
+      wins: 0,
+      losses: 0,
+      tradeCount: 0,
+      tradeHistory: [],
+      targetBalance: 10800,
+      riskPercent: 1,
+      rewardPercent: 2,
+      currentSystem: 'default',
+      tradingSystems: {
+        'default': {
+          name: 'Default System',
+          startingBalance: 10000,
+          currentBalance: 10000,
+          targetBalance: 10800,
+          riskPercent: 1,
+          rewardPercent: 2,
+          wins: 0,
+          losses: 0,
+          tradeCount: 0,
+          tradeHistory: []
+        }
+      },
+      savedScenarios: JSON.parse(localStorage.getItem('tradingScenarios')) || [],
+      simulationTradeSequence: [],
+      simulatedStartBalance: 100,
+      charts: {
+        balanceChart: null,
+        reportPie: null,
+        reportBar: null,
+        simulationChart: null
+      },
+      theme: localStorage.getItem('theme') || 'dark'
+    };
+
+    // ====== Modern Utility Functions ======
+    const utils = {
+      formatCurrency: (value) => `$${parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      
+      formatPercent: (value) => `${parseFloat(value).toFixed(2)}%`,
+      
+      animateNumber: (element, target, options = {}) => {
+        const current = parseFloat(element.dataset.value || element.textContent.replace(/[^0-9.-]+/g, '') || 0);
+        const duration = options.duration || 800;
+        const prefix = options.prefix || '';
+        const suffix = options.suffix || '';
+        const decimals = options.decimals || 2;
+        
+        const startTime = performance.now();
+        
+        function animate(time) {
+          const elapsed = time - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = progress < 0.5 
+            ? 2 * progress * progress 
+            : -1 + (4 - 2 * progress) * progress;
+          
+          const currentValue = current + (target - current) * eased;
+          
+          if (prefix === '$') {
+            element.textContent = utils.formatCurrency(currentValue);
+          } else if (suffix === '%') {
+            element.textContent = `${currentValue.toFixed(decimals)}%`;
+          } else {
+            element.textContent = prefix + currentValue.toFixed(decimals) + suffix;
+          }
+          
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            element.dataset.value = target;
+          }
+        }
+        
+        requestAnimationFrame(animate);
+      },
+      
+      showToast: (message, type = 'info') => {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        
+        // Remove previous classes
+        toast.className = 'toast-modern';
+        
+        // Add type-specific styling
+        switch(type) {
+          case 'success':
+            toast.style.background = 'linear-gradient(135deg, var(--success-color), var(--success-color)/80)';
+            break;
+          case 'error':
+            toast.style.background = 'linear-gradient(135deg, var(--danger-color), var(--danger-color)/80)';
+            break;
+          case 'warning':
+            toast.style.background = 'linear-gradient(135deg, var(--warning-color), var(--warning-color)/80)';
+            break;
+          default:
+            toast.style.background = 'var(--surface)';
+        }
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      },
+      
+      openModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
+      },
+      
+      closeModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.remove('open');
+          document.body.style.overflow = '';
+        }
+      },
+      
+      updateProgressDisplay: (percent) => {
+        const progressBar = document.getElementById('progressBar');
+        if (progressBar) {
+          progressBar.style.width = `${Math.min(Math.max(percent, 0), 100)}%`;
+        }
+        
+        const percentElement = document.getElementById('progressPercent');
+        const progressElement = document.getElementById('targetProgress');
+        
+        if (percentElement) {
+          utils.animateNumber(percentElement, percent, { suffix: '%', decimals: 0 });
+        }
+        
+        if (progressElement) {
+          const amount = (state.targetBalance - state.currentBalance).toFixed(2);
+          progressElement.textContent = utils.formatCurrency(Math.max(0, amount));
+        }
+      },
+      
+      getThemeColor: (variable) => {
+        return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+      },
+      
+      updateProgressBlock: () => {
+        const progressPercent = ((state.currentBalance - state.startingBalance) / (state.targetBalance - state.startingBalance) * 100);
+        utils.updateProgressDisplay(Math.min(Math.max(progressPercent, 0), 100));
+        
+        document.getElementById('progressCurrentBalance').textContent = utils.formatCurrency(state.currentBalance);
+        document.getElementById('progressStartBalance').textContent = utils.formatCurrency(state.startingBalance);
+        document.getElementById('progressTargetBalance').textContent = utils.formatCurrency(state.targetBalance);
+      },
+      
+      updateBadges: () => {
+        const totalTrades = state.wins + state.losses;
+        const profitPercent = ((state.currentBalance - state.startingBalance) / state.startingBalance * 100);
+        const winRate = totalTrades > 0 ? (state.wins / totalTrades * 100) : 0;
+        const profitFactor = state.losses > 0 ? 
+          (state.tradeHistory.filter(t => t.type === 'win').reduce((s, t) => s + t.amount, 0) / 
+           state.tradeHistory.filter(t => t.type === 'loss').reduce((s, t) => s + t.amount, 0)) : 0;
+        
+        // Update balance badge
+        const balanceBadge = document.getElementById('balanceBadge');
+        if (balanceBadge) {
+          if (totalTrades === 0) {
+            balanceBadge.className = 'badge badge-neutral';
+            balanceBadge.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Start trading to see profit';
+          } else if (profitPercent > 0) {
+            balanceBadge.className = 'badge badge-success';
+            balanceBadge.innerHTML = `<i class="fas fa-arrow-up mr-2"></i>${profitPercent.toFixed(2)}% profit`;
+          } else if (profitPercent < 0) {
+            balanceBadge.className = 'badge badge-danger';
+            balanceBadge.innerHTML = `<i class="fas fa-arrow-down mr-2"></i>${Math.abs(profitPercent).toFixed(2)}% loss`;
+          } else {
+            balanceBadge.className = 'badge badge-neutral';
+            balanceBadge.innerHTML = '<i class="fas fa-minus mr-2"></i>0% change';
+          }
+        }
+        
+        // Update win rate badge
+        const winRateBadge = document.getElementById('winRateBadge');
+        if (winRateBadge) {
+          if (totalTrades === 0) {
+            winRateBadge.className = 'badge badge-neutral';
+            winRateBadge.innerHTML = '<i class="fas fa-chart-line mr-2"></i>No trades recorded';
+          } else if (winRate >= 60) {
+            winRateBadge.className = 'badge badge-success';
+            winRateBadge.innerHTML = `<i class="fas fa-trophy mr-2"></i>Excellent win rate`;
+          } else if (winRate >= 40) {
+            winRateBadge.className = 'badge badge-warning';
+            winRateBadge.innerHTML = `<i class="fas fa-chart-line mr-2"></i>Good win rate`;
+          } else {
+            winRateBadge.className = 'badge badge-danger';
+            winRateBadge.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>Needs improvement`;
+          }
+        }
+        
+        // Update profit factor badge
+        const profitFactorBadge = document.getElementById('profitFactorBadge');
+        if (profitFactorBadge) {
+          if (totalTrades === 0) {
+            profitFactorBadge.className = 'badge badge-neutral';
+            profitFactorBadge.innerHTML = '<i class="fas fa-calculator mr-2"></i>Calculate after trades';
+          } else if (profitFactor > 2) {
+            profitFactorBadge.className = 'badge badge-success';
+            profitFactorBadge.innerHTML = `<i class="fas fa-star mr-2"></i>Excellent (${profitFactor.toFixed(2)})`;
+          } else if (profitFactor > 1.5) {
+            profitFactorBadge.className = 'badge badge-success';
+            profitFactorBadge.innerHTML = `<i class="fas fa-check mr-2"></i>Good (${profitFactor.toFixed(2)})`;
+          } else if (profitFactor > 1) {
+            profitFactorBadge.className = 'badge badge-warning';
+            profitFactorBadge.innerHTML = `<i class="fas fa-info-circle mr-2"></i>Okay (${profitFactor.toFixed(2)})`;
+          } else {
+            profitFactorBadge.className = 'badge badge-danger';
+            profitFactorBadge.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>Needs work (${profitFactor.toFixed(2)})`;
+          }
+        }
+      }
+    };
+
+    // ====== Initialization ======
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeApp();
+      setupEventListeners();
+    });
+
+    function initializeApp() {
+      // Set initial theme
+      document.documentElement.setAttribute('data-theme', state.theme);
+      updateThemeIcon();
+      
+      // Load saved data
+      loadFromStorage();
+      
+      // Initialize displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Set current date for reports
+      const now = new Date();
+      const reportCalendar = document.getElementById('reportCalendar');
+      if (reportCalendar) {
+        reportCalendar.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      }
+      
+      // Show dashboard by default
+      showTab('trackerTab');
+    }
+
+    function setupEventListeners() {
+      // Theme toggle
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      
+      // Mobile menu
+      document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileNav);
+      
+      // Keyboard shortcuts for trading (allowed)
+      document.addEventListener('keydown', handleKeyboardShortcuts);
+      
+      // Close modals on escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-modern.open').forEach(modal => {
+            utils.closeModal(modal.id);
+          });
+        }
+      });
+      
+      // Close modals on background click
+      document.querySelectorAll('.modal-modern').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            utils.closeModal(modal.id);
+          }
+        });
+      });
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      state.theme = newTheme;
+      localStorage.setItem('theme', newTheme);
+      
+      updateThemeIcon();
+      updateCharts();
+      
+      utils.showToast(`Switched to ${newTheme} theme`, 'success');
+    }
+
+    function updateThemeIcon() {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.className = state.theme === 'dark' ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-indigo-500';
+      }
+    }
+
+    function toggleMobileNav() {
+      const nav = document.getElementById('mobileNav');
+      const isHidden = nav.classList.contains('hidden');
+      
+      if (isHidden) {
+        nav.classList.remove('hidden');
+      } else {
+        nav.classList.add('hidden');
+      }
+    }
+
+    function handleKeyboardShortcuts(e) {
+      // Trade recording shortcuts
+      if (e.ctrlKey && e.shiftKey) {
+        if (e.key === 'W' || e.key === 'w') {
+          e.preventDefault();
+          const tradeControls = document.getElementById('tradeControls');
+          if (tradeControls && tradeControls.style.display !== 'none') {
+            recordTrade('win');
+          }
+        }
+        if (e.key === 'L' || e.key === 'l') {
+          e.preventDefault();
+          const tradeControls = document.getElementById('tradeControls');
+          if (tradeControls && tradeControls.style.display !== 'none') {
+            recordTrade('loss');
+          }
+        }
+      }
+      
+      // Tab switching shortcuts
+      if (e.altKey) {
+        switch(e.key) {
+          case '1':
+            e.preventDefault();
+            showTab('trackerTab');
+            break;
+          case '2':
+            e.preventDefault();
+            showTab('tradeHistoryTab');
+            break;
+          case '3':
+            e.preventDefault();
+            showTab('tradeJournalTab');
+            break;
+          case '4':
+            e.preventDefault();
+            showTab('reportTab');
+            break;
+          case '5':
+            e.preventDefault();
+            showTab('scenarioTab');
+            break;
+        }
+      }
+    }
+
+    // ====== Data Management ======
+    function loadFromStorage() {
+      const saved = localStorage.getItem('tradingData');
+      if (!saved) return;
+      
+      try {
+        const data = JSON.parse(saved);
+        
+        // Update state
+        Object.assign(state, {
+          currentBalance: data.currentBalance || 10000,
+          startingBalance: data.startingBalance || 10000,
+          wins: data.wins || 0,
+          losses: data.losses || 0,
+          tradeCount: data.tradeCount || 0,
+          tradeHistory: data.tradeHistory || [],
+          targetBalance: data.targetBalance || 10800,
+          riskPercent: data.riskPercent || 1,
+          rewardPercent: data.rewardPercent || 2,
+          simulatedStartBalance: data.simulatedStartBalance || 100,
+          tradingSystems: data.tradingSystems || state.tradingSystems,
+          currentSystem: data.currentSystem || 'default'
+        });
+        
+        // Update simulation sequence
+        if (state.tradeHistory.length > 0) {
+          state.simulationTradeSequence = state.tradeHistory.map(t => t.type);
+        }
+        
+        // Load scenarios
+        const savedScenarios = localStorage.getItem('tradingScenarios');
+        if (savedScenarios) {
+          state.savedScenarios = JSON.parse(savedScenarios);
+        }
+        
+        // Update inputs
+        document.getElementById('startingBalance').value = state.startingBalance;
+        document.getElementById('targetBalance').value = state.targetBalance;
+        document.getElementById('riskPercent').value = state.riskPercent;
+        document.getElementById('rewardPercent').value = state.rewardPercent;
+        document.getElementById('simulatedStartBalance').value = state.simulatedStartBalance;
+        
+        // Update system dropdown
+        updateSystemDropdown();
+        
+        // Show trade controls if we have data
+        if (state.tradeCount > 0) {
+          document.getElementById('tradeControls').style.display = 'block';
+          document.getElementById('initPrompt').style.display = 'none';
+        }
+        
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+        utils.showToast('Error loading saved data', 'error');
+      }
+    }
+
+    function saveToStorage() {
+      const data = {
+        currentBalance: state.currentBalance,
+        startingBalance: state.startingBalance,
+        wins: state.wins,
+        losses: state.losses,
+        tradeCount: state.tradeCount,
+        tradeHistory: state.tradeHistory,
+        targetBalance: state.targetBalance,
+        riskPercent: state.riskPercent,
+        rewardPercent: state.rewardPercent,
+        simulatedStartBalance: state.simulatedStartBalance,
+        tradingSystems: state.tradingSystems,
+        currentSystem: state.currentSystem,
+        savedScenarios: state.savedScenarios
+      };
+      
+      localStorage.setItem('tradingData', JSON.stringify(data));
+    }
+
+    // ====== Core Trading Functions ======
+    function initTrading() {
+      // Validate inputs
+      if (!validateInputs()) return;
+      
+      // Update state from inputs
+      state.startingBalance = parseFloat(document.getElementById('startingBalance').value);
+      state.currentBalance = state.startingBalance;
+      state.targetBalance = parseFloat(document.getElementById('targetBalance').value);
+      state.riskPercent = parseFloat(document.getElementById('riskPercent').value);
+      state.rewardPercent = parseFloat(document.getElementById('rewardPercent').value);
+      
+      // Update simulated start balance
+      state.simulatedStartBalance = 100;
+      document.getElementById('simulatedStartBalance').value = state.simulatedStartBalance;
+      
+      // Clear trade history if starting fresh
+      if (state.tradeHistory.length === 0) {
+        state.wins = 0;
+        state.losses = 0;
+        state.tradeCount = 0;
+      }
+      
+      // Update current system
+      state.tradingSystems[state.currentSystem] = {
+        ...state.tradingSystems[state.currentSystem],
+        startingBalance: state.startingBalance,
+        currentBalance: state.currentBalance,
+        targetBalance: state.targetBalance,
+        riskPercent: state.riskPercent,
+        rewardPercent: state.rewardPercent,
+        wins: state.wins,
+        losses: state.losses,
+        tradeCount: state.tradeCount,
+        tradeHistory: state.tradeHistory
+      };
+      
+      // Show trade controls
+      document.getElementById('tradeControls').style.display = 'block';
+      document.getElementById('initPrompt').style.display = 'none';
+      
+      // Update all displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Save to storage
+      saveToStorage();
+      
+      utils.showToast('Trading initialized successfully!', 'success');
+    }
+
+    function validateInputs() {
+      const startBalance = parseFloat(document.getElementById('startingBalance').value);
+      const targetBalance = parseFloat(document.getElementById('targetBalance').value);
+      const riskPercent = parseFloat(document.getElementById('riskPercent').value);
+      const rewardPercent = parseFloat(document.getElementById('rewardPercent').value);
+      
+      let isValid = true;
+      
+      if (isNaN(startBalance) || startBalance <= 0) {
+        utils.showToast('Please enter a valid starting balance', 'error');
+        isValid = false;
+      }
+      
+      if (isNaN(targetBalance) || targetBalance <= startBalance) {
+        utils.showToast('Target balance must be greater than starting balance', 'error');
+        isValid = false;
+      }
+      
+      if (isNaN(riskPercent) || riskPercent <= 0 || riskPercent > 100) {
+        utils.showToast('Risk percentage must be between 0.1% and 100%', 'error');
+        isValid = false;
+      }
+      
+      if (isNaN(rewardPercent) || rewardPercent <= 0 || rewardPercent > 100) {
+        utils.showToast('Reward percentage must be between 0.1% and 100%', 'error');
+        isValid = false;
+      }
+      
+      return isValid;
+    }
+
+    function recordTrade(type) {
+      const balanceBefore = state.currentBalance;
+      let amount = 0;
+      
+      if (type === 'win') {
+        amount = state.currentBalance * (state.rewardPercent / 100);
+        state.currentBalance += amount;
+        state.wins++;
+        
+        state.tradeHistory.push({
+          type: 'win',
+          balanceBefore,
+          amount,
+          balanceAfter: state.currentBalance,
+          screenshot: null,
+          note: '',
+          timestamp: new Date().toISOString()
+        });
+        
+        utils.showToast('Win recorded!', 'success');
+      } else {
+        amount = state.currentBalance * (state.riskPercent / 100);
+        state.currentBalance -= amount;
+        state.losses++;
+        
+        state.tradeHistory.push({
+          type: 'loss',
+          balanceBefore,
+          amount,
+          balanceAfter: state.currentBalance,
+          screenshot: null,
+          note: '',
+          timestamp: new Date().toISOString()
+        });
+        
+        utils.showToast('Loss recorded', 'warning');
+      }
+      
+      state.tradeCount++;
+      
+      // Update simulation sequence
+      state.simulationTradeSequence = state.tradeHistory.map(t => t.type);
+      
+      // Update system
+      state.tradingSystems[state.currentSystem] = {
+        ...state.tradingSystems[state.currentSystem],
+        currentBalance: state.currentBalance,
+        wins: state.wins,
+        losses: state.losses,
+        tradeCount: state.tradeCount,
+        tradeHistory: state.tradeHistory
+      };
+      
+      // Update displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Save to storage
+      saveToStorage();
+    }
+
+    // ====== Display Update Functions ======
+    function updateAllDisplays() {
+      // Update main stats
+      updateBalanceDisplay();
+      updateStatistics();
+      updateAdvancedMetrics();
+      updateQuickStats();
+      utils.updateProgressBlock();
+      utils.updateBadges();
+    }
+
+    function updateBalanceDisplay() {
+      const balanceElement = document.getElementById('currentBalance');
+      if (balanceElement) {
+        utils.animateNumber(balanceElement, state.currentBalance, { prefix: '$' });
+      }
+    }
+
+    function updateStatistics() {
+      const total = state.wins + state.losses;
+      const winRate = total > 0 ? (state.wins / total * 100) : 0;
+      
+      // Update win rate
+      const winRateElement = document.getElementById('winRate');
+      if (winRateElement) {
+        utils.animateNumber(winRateElement, winRate, { suffix: '%', decimals: 2 });
+      }
+      
+      // Calculate expectancy
+      let expectancy = 0;
+      if (total > 0) {
+        const avgWin = state.wins > 0 ? 
+          state.tradeHistory.filter(t => t.type === 'win').reduce((s, t) => s + t.amount, 0) / state.wins : 0;
+        const avgLoss = state.losses > 0 ? 
+          state.tradeHistory.filter(t => t.type === 'loss').reduce((s, t) => s + t.amount, 0) / state.losses : 0;
+        expectancy = (winRate / 100 * avgWin) - ((100 - winRate) / 100 * avgLoss);
+      }
+      
+      const expectancyElement = document.getElementById('expectancy');
+      if (expectancyElement) {
+        utils.animateNumber(expectancyElement, expectancy, { prefix: '$' });
+      }
+      
+      // Calculate profit factor
+      let profitFactor = 0;
+      if (state.losses > 0) {
+        const grossProfit = state.tradeHistory.filter(t => t.type === 'win').reduce((s, t) => s + t.amount, 0);
+        const grossLoss = state.tradeHistory.filter(t => t.type === 'loss').reduce((s, t) => s + t.amount, 0);
+        profitFactor = grossProfit / grossLoss;
+      }
+      
+      const profitFactorElement = document.getElementById('profitFactor');
+      if (profitFactorElement) {
+        profitFactorElement.textContent = isFinite(profitFactor) ? profitFactor.toFixed(2) : '0.00';
+      }
+    }
+
+    function updateAdvancedMetrics() {
+      if (state.tradeHistory.length === 0) {
+        document.getElementById('maxDrawdown').textContent = '0%';
+        document.getElementById('recoveryFactor').textContent = '0.00';
+        document.getElementById('consecutiveWins').textContent = '0';
+        document.getElementById('consecutiveLosses').textContent = '0';
+        return;
+      }
+      
+      // Calculate max drawdown
+      let peak = state.startingBalance;
+      let maxDrawdown = 0;
+      
+      state.tradeHistory.forEach(trade => {
+        if (trade.balanceAfter > peak) {
+          peak = trade.balanceAfter;
+        }
+        const drawdown = ((peak - trade.balanceAfter) / peak) * 100;
+        if (drawdown > maxDrawdown) {
+          maxDrawdown = drawdown;
+        }
+      });
+      
+      // Calculate consecutive wins/losses
+      let currentStreak = 0;
+      let maxConsecutiveWins = 0;
+      let maxConsecutiveLosses = 0;
+      let lastType = null;
+      
+      state.tradeHistory.forEach(trade => {
+        if (trade.type === lastType) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+          lastType = trade.type;
+        }
+        
+        if (trade.type === 'win' && currentStreak > maxConsecutiveWins) {
+          maxConsecutiveWins = currentStreak;
+        } else if (trade.type === 'loss' && currentStreak > maxConsecutiveLosses) {
+          maxConsecutiveLosses = currentStreak;
+        }
+      });
+      
+      // Calculate recovery factor
+      const totalProfit = state.tradeHistory.filter(t => t.type === 'win').reduce((sum, t) => sum + t.amount, 0);
+      const recoveryFactor = maxDrawdown > 0 ? (totalProfit / (state.startingBalance * maxDrawdown / 100)).toFixed(2) : '0.00';
+      
+      // Update elements
+      document.getElementById('maxDrawdown').textContent = `${maxDrawdown.toFixed(2)}%`;
+      document.getElementById('recoveryFactor').textContent = recoveryFactor;
+      document.getElementById('consecutiveWins').textContent = maxConsecutiveWins;
+      document.getElementById('consecutiveLosses').textContent = maxConsecutiveLosses;
+    }
+
+    function updateQuickStats() {
+      document.getElementById('totalTrades').textContent = state.tradeCount;
+      document.getElementById('winsCount').textContent = state.wins;
+      document.getElementById('lossesCount').textContent = state.losses;
+      
+      // Calculate estimated trades to target
+      if (state.currentBalance >= state.targetBalance) {
+        document.getElementById('estimatedTrades').textContent = '0 (Target Reached!)';
+      } else {
+        const growth = 1 + (state.rewardPercent / 100);
+        const tradesNeeded = Math.ceil(Math.log(state.targetBalance / state.currentBalance) / Math.log(growth));
+        document.getElementById('estimatedTrades').textContent = tradesNeeded;
+      }
+    }
+
+    // ====== Trade History Functions ======
+    function updateTradeHistoryTable() {
+      const tbody = document.getElementById('tradeHistoryBody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (state.tradeHistory.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-8 text-[var(--text-secondary)]">
+              No trades recorded yet
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Calculate summary
+      const total = state.tradeHistory.length;
+      const wins = state.tradeHistory.filter(t => t.type === 'win').length;
+      const losses = state.tradeHistory.filter(t => t.type === 'loss').length;
+      const totalProfit = state.tradeHistory.filter(t => t.type === 'win').reduce((sum, t) => sum + t.amount, 0);
+      const totalLoss = state.tradeHistory.filter(t => t.type === 'loss').reduce((sum, t) => sum + t.amount, 0);
+      const netPnL = totalProfit - totalLoss;
+      
+      // Update summary cards
+      document.getElementById('sumTotal').textContent = total;
+      document.getElementById('sumWins').textContent = wins;
+      document.getElementById('sumLosses').textContent = losses;
+      document.getElementById('sumPnL').textContent = utils.formatCurrency(netPnL);
+      
+      // Add trade rows (newest first)
+      state.tradeHistory.slice().reverse().forEach((trade, index) => {
+        const tradeNumber = state.tradeHistory.length - index;
+        const date = new Date(trade.timestamp);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+        const formattedTime = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-medium">${tradeNumber}</td>
+          <td>
+            <span class="badge ${trade.type === 'win' ? 'badge-success' : 'badge-danger'}">
+              ${trade.type.toUpperCase()}
+            </span>
+          </td>
+          <td>
+            <div class="text-sm">${formattedDate}</div>
+            <div class="text-xs text-[var(--text-secondary)]">${formattedTime}</div>
+          </td>
+          <td class="font-medium">${utils.formatCurrency(trade.balanceBefore)}</td>
+          <td class="${trade.type === 'win' ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}">
+            ${trade.type === 'win' ? '+' : '-'}${utils.formatCurrency(trade.amount)}
+          </td>
+          <td class="font-bold">${utils.formatCurrency(trade.balanceAfter)}</td>
+          <td>
+            <button onclick="removeTrade(${tradeNumber - 1})" class="w-8 h-8 rounded-lg hover:bg-red-500/20 text-red-500 flex items-center justify-center">
+              <i class="fas fa-trash text-sm"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      // Update chart
+      updateBalanceChart();
+    }
+
+    function removeTrade(index) {
+      if (!confirm('Are you sure you want to delete this trade?')) return;
+      
+      const trade = state.tradeHistory[index];
+      
+      // Update state
+      state.tradeHistory.splice(index, 1);
+      state.tradeCount = state.tradeHistory.length;
+      state.wins = state.tradeHistory.filter(t => t.type === 'win').length;
+      state.losses = state.tradeHistory.filter(t => t.type === 'loss').length;
+      
+      // FIXED: Recalculate ALL balances after deletion
+      state.currentBalance = state.startingBalance;
+      state.tradeHistory.forEach((t, i) => {
+        const previousBalance = i === 0 ? state.startingBalance : state.tradeHistory[i-1].balanceAfter;
+        if (t.type === 'win') {
+          state.currentBalance = previousBalance + previousBalance * (state.rewardPercent / 100);
+        } else {
+          state.currentBalance = previousBalance - previousBalance * (state.riskPercent / 100);
+        }
+        // Update the trade's balance data
+        t.balanceBefore = previousBalance;
+        t.balanceAfter = state.currentBalance;
+        t.amount = Math.abs(state.currentBalance - previousBalance);
+      });
+      
+      // Update simulation sequence
+      state.simulationTradeSequence = state.tradeHistory.map(t => t.type);
+      
+      // Update system
+      state.tradingSystems[state.currentSystem] = {
+        ...state.tradingSystems[state.currentSystem],
+        currentBalance: state.currentBalance,
+        wins: state.wins,
+        losses: state.losses,
+        tradeCount: state.tradeCount,
+        tradeHistory: state.tradeHistory
+      };
+      
+      // Update displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Save to storage
+      saveToStorage();
+      
+      utils.showToast('Trade removed successfully', 'success');
+    }
+
+    function applyFilters() {
+      updateTradeHistoryTable();
+    }
+
+    function clearFilters() {
+      const filterType = document.getElementById('filterType');
+      const filterFrom = document.getElementById('filterFrom');
+      const filterTo = document.getElementById('filterTo');
+      
+      if (filterType) filterType.value = 'all';
+      if (filterFrom) filterFrom.value = '';
+      if (filterTo) filterTo.value = '';
+      
+      updateTradeHistoryTable();
+    }
+
+    // ====== Chart Functions ======
+    function updateBalanceChart() {
+      const ctx = document.getElementById('balanceChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      // Destroy existing chart
+      if (state.charts.balanceChart) {
+        state.charts.balanceChart.destroy();
+      }
+      
+      // Prepare data - FIXED: Calculate cumulative balance
+      const balanceData = [state.startingBalance];
+      const labels = ['Start'];
+      const pointColors = [utils.getThemeColor('--primary-color')];
+      
+      state.tradeHistory.forEach((trade, i) => {
+        balanceData.push(trade.balanceAfter);
+        labels.push(`Trade ${i + 1}`);
+        pointColors.push(trade.type === 'win' ? 
+          utils.getThemeColor('--success-color') : 
+          utils.getThemeColor('--danger-color'));
+      });
+      
+      // Create gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, utils.getThemeColor('--primary-color') + '80');
+      gradient.addColorStop(1, utils.getThemeColor('--primary-color') + '10');
+      
+      state.charts.balanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Balance',
+            data: balanceData,
+            borderColor: utils.getThemeColor('--primary-color'),
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: utils.getThemeColor('--surface'),
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 10,
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: utils.getThemeColor('--surface'),
+              titleColor: utils.getThemeColor('--text-primary'),
+              bodyColor: utils.getThemeColor('--text-primary'),
+              borderColor: utils.getThemeColor('--primary-color'),
+              borderWidth: 1,
+              callbacks: {
+                label: (context) => `Balance: ${utils.formatCurrency(context.parsed.y)}`
+              }
+            },
+            zoom: {
+              pan: {
+                enabled: true,
+                mode: 'x',
+                modifierKey: 'ctrl'
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                  speed: 0.1
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+                drag: {
+                  enabled: true,
+                  backgroundColor: utils.getThemeColor('--primary-color') + '40',
+                  borderColor: utils.getThemeColor('--primary-color'),
+                  borderWidth: 1
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: utils.getThemeColor('--accent-color') + '40'
+              },
+              ticks: {
+                color: utils.getThemeColor('--text-secondary'),
+                maxTicksLimit: 10
+              }
+            },
+            y: {
+              grid: {
+                color: utils.getThemeColor('--accent-color') + '40'
+              },
+              ticks: {
+                color: utils.getThemeColor('--text-secondary'),
+                callback: (value) => `$${value.toLocaleString()}`,
+                padding: 10
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          animation: {
+            duration: 750
+          }
+        }
+      });
+    }
+
+    // Chart control functions
+    function zoomChart(chartId, direction) {
+      if (!state.charts[chartId]) return;
+      
+      const chart = state.charts[chartId];
+      const zoom = direction === 'in' ? 0.9 : 1.1;
+      
+      if (chart.options.plugins.zoom.zoom.wheel.enabled) {
+        chart.zoom(zoom);
+      }
+    }
+
+    function resetZoomChart(chartId) {
+      if (!state.charts[chartId]) return;
+      
+      const chart = state.charts[chartId];
+      chart.resetZoom();
+    }
+
+    function updateCharts() {
+      updateBalanceChart();
+    }
+
+    // ====== System Management Functions ======
+    function updateSystemDropdown() {
+      const select = document.getElementById('systemSelect');
+      if (!select) return;
+      
+      select.innerHTML = '';
+      
+      Object.entries(state.tradingSystems).forEach(([key, system]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = system.name;
+        if (key === state.currentSystem) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+    }
+
+    function switchSystem(systemName) {
+      if (!state.tradingSystems[systemName]) return;
+      
+      state.currentSystem = systemName;
+      const system = state.tradingSystems[systemName];
+      
+      // Update state from system
+      Object.assign(state, {
+        startingBalance: system.startingBalance,
+        currentBalance: system.currentBalance,
+        targetBalance: system.targetBalance,
+        riskPercent: system.riskPercent,
+        rewardPercent: system.rewardPercent,
+        wins: system.wins,
+        losses: system.losses,
+        tradeCount: system.tradeCount,
+        tradeHistory: system.tradeHistory
+      });
+      
+      // Update inputs
+      document.getElementById('startingBalance').value = state.startingBalance;
+      document.getElementById('targetBalance').value = state.targetBalance;
+      document.getElementById('riskPercent').value = state.riskPercent;
+      document.getElementById('rewardPercent').value = state.rewardPercent;
+      
+      // Update simulation sequence
+      if (state.tradeHistory.length > 0) {
+        state.simulationTradeSequence = state.tradeHistory.map(t => t.type);
+      }
+      
+      // Update displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Show/hide trade controls
+      if (state.tradeCount > 0) {
+        document.getElementById('tradeControls').style.display = 'block';
+        document.getElementById('initPrompt').style.display = 'none';
+      } else {
+        document.getElementById('tradeControls').style.display = 'none';
+        document.getElementById('initPrompt').style.display = 'block';
+      }
+      
+      // Save to storage
+      saveToStorage();
+      
+      utils.showToast(`Switched to "${system.name}"`, 'success');
+    }
+
+    function showSystemModal() {
+      utils.openModal('systemModal');
+      updateSystemList();
+    }
+
+    function addSystem() {
+      const nameInput = document.getElementById('systemName');
+      const name = nameInput.value.trim();
+      
+      if (!name) {
+        utils.showToast('Please enter a system name', 'error');
+        return;
+      }
+      
+      if (state.tradingSystems[name]) {
+        utils.showToast('A system with this name already exists', 'error');
+        return;
+      }
+      
+      // Create new system
+      state.tradingSystems[name] = {
+        name,
+        startingBalance: 10000,
+        currentBalance: 10000,
+        targetBalance: 10800,
+        riskPercent: 1,
+        rewardPercent: 2,
+        wins: 0,
+        losses: 0,
+        tradeCount: 0,
+        tradeHistory: []
+      };
+      
+      // Update UI
+      updateSystemDropdown();
+      nameInput.value = '';
+      updateSystemList();
+      
+      // Save to storage
+      saveToStorage();
+      
+      utils.showToast(`System "${name}" created`, 'success');
+    }
+
+    function updateSystemList() {
+      const systemList = document.getElementById('systemList');
+      if (!systemList) return;
+      
+      systemList.innerHTML = '';
+      
+      Object.entries(state.tradingSystems).forEach(([key, system]) => {
+        if (key === 'default') return;
+        
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-4 rounded-xl bg-white/5';
+        div.innerHTML = `
+          <div>
+            <div class="font-medium">${system.name}</div>
+            <div class="text-sm text-[var(--text-secondary)]">
+              ${system.tradeCount} trades • ${utils.formatCurrency(system.currentBalance)}
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="deleteSystem('${key}')" class="w-8 h-8 rounded-lg hover:bg-red-500/20 text-red-500 flex items-center justify-center">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        systemList.appendChild(div);
+      });
+    }
+
+    function deleteSystem(systemName) {
+      if (systemName === 'default') {
+        utils.showToast('Cannot delete the default system', 'error');
+        return;
+      }
+      
+      if (!confirm(`Delete "${systemName}" system? This action cannot be undone.`)) {
+        return;
+      }
+      
+      delete state.tradingSystems[systemName];
+      
+      // If deleting current system, switch to default
+      if (state.currentSystem === systemName) {
+        switchSystem('default');
+      }
+      
+      updateSystemDropdown();
+      updateSystemList();
+      saveToStorage();
+      
+      utils.showToast(`System "${systemName}" deleted`, 'success');
+    }
+
+    // ====== Simulator Functions ======
+    function updateSimulatorInfo() {
+      document.getElementById('tradeCountDisplay').textContent = state.simulationTradeSequence.length;
+      
+      if (state.simulationTradeSequence.length > 0) {
+        const wins = state.simulationTradeSequence.filter(t => t === 'win').length;
+        const winRate = (wins / state.simulationTradeSequence.length * 100).toFixed(2);
+        document.getElementById('winRateDisplay').textContent = `${winRate}%`;
+      } else {
+        document.getElementById('winRateDisplay').textContent = '0%';
+      }
+      
+      document.getElementById('originalStartBalance').value = state.startingBalance;
+      document.getElementById('originalRisk').value = state.riskPercent;
+      document.getElementById('originalReward').value = state.rewardPercent;
+      document.getElementById('originalFinalBalance').textContent = utils.formatCurrency(state.currentBalance).slice(1);
+      
+      document.getElementById('simulatedStartBalance').value = state.simulatedStartBalance;
+    }
+
+    function setScenario(risk, reward) {
+      document.getElementById('simulateRisk').value = risk;
+      document.getElementById('simulateReward').value = reward;
+    }
+
+    function runSimulation() {
+      if (state.simulationTradeSequence.length === 0) {
+        utils.showToast('No trades to simulate. Record some trades first.', 'error');
+        return;
+      }
+      
+      const simRisk = parseFloat(document.getElementById('simulateRisk').value);
+      const simReward = parseFloat(document.getElementById('simulateReward').value);
+      const simStartBalance = parseFloat(document.getElementById('simulatedStartBalance').value);
+      
+      // Validate inputs
+      if (isNaN(simRisk) || simRisk <= 0 || simRisk > 100) {
+        utils.showToast('Please enter a valid risk percentage (0.1-100)', 'error');
+        return;
+      }
+      
+      if (isNaN(simReward) || simReward <= 0 || simReward > 100) {
+        utils.showToast('Please enter a valid reward percentage (0.1-100)', 'error');
+        return;
+      }
+      
+      if (isNaN(simStartBalance) || simStartBalance <= 0) {
+        utils.showToast('Please enter a valid starting balance', 'error');
+        return;
+      }
+      
+      // Run simulations
+      const originalResult = simulateScenario(state.startingBalance, state.riskPercent, state.rewardPercent);
+      const simulatedResult = simulateScenario(simStartBalance, simRisk, simReward);
+      
+      // Update UI
+      updateSimulationResults(originalResult, simulatedResult, simStartBalance, simRisk, simReward);
+      
+      // Show results
+      document.getElementById('simulationResults').classList.remove('hidden');
+      
+      // Update comparison chart
+      updateComparisonChart(originalResult.history, simulatedResult.history);
+      
+      utils.showToast('Simulation completed successfully', 'success');
+    }
+
+    function simulateScenario(startBalance, riskPercent, rewardPercent) {
+      let balance = startBalance;
+      const history = [];
+      let wins = 0;
+      let losses = 0;
+      let totalProfit = 0;
+      let totalLoss = 0;
+      
+      state.simulationTradeSequence.forEach((tradeType, index) => {
+        const balanceBefore = balance;
+        let amount = 0;
+        
+        if (tradeType === 'win') {
+          amount = balance * (rewardPercent / 100);
+          balance += amount;
+          wins++;
+          totalProfit += amount;
+        } else {
+          amount = balance * (riskPercent / 100);
+          balance -= amount;
+          losses++;
+          totalLoss += amount;
+        }
+        
+        history.push({
+          type: tradeType,
+          balanceBefore,
+          amount,
+          balanceAfter: balance,
+          tradeNumber: index + 1
+        });
+      });
+      
+      return {
+        finalBalance: balance,
+        totalPnL: balance - startBalance,
+        wins,
+        losses,
+        winRate: wins + losses > 0 ? (wins / (wins + losses) * 100) : 0,
+        profitFactor: totalLoss > 0 ? (totalProfit / totalLoss) : 0,
+        history
+      };
+    }
+
+    function updateSimulationResults(original, simulated, simStartBalance, simRisk, simReward) {
+      // Update result cards
+      document.getElementById('simFinalBalance').textContent = utils.formatCurrency(simulated.finalBalance);
+      document.getElementById('simTotalPL').textContent = utils.formatCurrency(simulated.totalPnL);
+      document.getElementById('simWinRate').textContent = `${simulated.winRate.toFixed(2)}%`;
+      document.getElementById('simProfitFactor').textContent = simulated.profitFactor.toFixed(2);
+      
+      // Update simulated final balance
+      document.getElementById('simulatedFinalBalance').textContent = utils.formatCurrency(simulated.finalBalance).slice(1);
+      
+      // Update comparison display
+      document.getElementById('originalStartBalanceDisplay').textContent = utils.formatCurrency(state.startingBalance).slice(1);
+      document.getElementById('originalRiskDisplay').textContent = state.riskPercent;
+      document.getElementById('originalRewardDisplay').textContent = state.rewardPercent;
+      document.getElementById('originalFinalResult').textContent = utils.formatCurrency(original.finalBalance).slice(1);
+      document.getElementById('originalTotalPL').textContent = utils.formatCurrency(original.totalPnL).slice(1);
+      
+      document.getElementById('simStartBalanceDisplay').textContent = utils.formatCurrency(simStartBalance).slice(1);
+      document.getElementById('simRiskDisplay').textContent = simRisk;
+      document.getElementById('simRewardDisplay').textContent = simReward;
+      document.getElementById('simFinalResult').textContent = utils.formatCurrency(simulated.finalBalance).slice(1);
+      document.getElementById('simulatedTotalPL').textContent = utils.formatCurrency(simulated.totalPnL).slice(1);
+    }
+
+    function updateComparisonChart(originalHistory, simulatedHistory) {
+      const ctx = document.getElementById('simulationChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      // Destroy existing chart
+      if (state.charts.simulationChart) {
+        state.charts.simulationChart.destroy();
+      }
+      
+      const labels = originalHistory.map((h, i) => `Trade ${i + 1}`);
+      const originalData = originalHistory.map(h => h.balanceAfter);
+      const simulatedData = simulatedHistory.map(h => h.balanceAfter);
+      
+      state.charts.simulationChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Original Scenario',
+              data: originalData,
+              borderColor: utils.getThemeColor('--primary-color'),
+              backgroundColor: utils.getThemeColor('--primary-color') + '20',
+              fill: false,
+              tension: 0.4,
+              borderWidth: 3,
+              pointRadius: 5,
+              pointHoverRadius: 8
+            },
+            {
+              label: 'Simulated Scenario',
+              data: simulatedData,
+              borderColor: utils.getThemeColor('--success-color'),
+              backgroundColor: utils.getThemeColor('--success-color') + '20',
+              fill: false,
+              tension: 0.4,
+              borderWidth: 3,
+              borderDash: [5, 5],
+              pointRadius: 5,
+              pointHoverRadius: 8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: utils.getThemeColor('--text-primary'),
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: utils.getThemeColor('--surface'),
+              titleColor: utils.getThemeColor('--text-primary'),
+              bodyColor: utils.getThemeColor('--text-primary'),
+              borderColor: utils.getThemeColor('--primary-color'),
+              borderWidth: 1,
+              callbacks: {
+                label: (context) => {
+                  const datasetLabel = context.dataset.label;
+                  const value = utils.formatCurrency(context.parsed.y);
+                  return `${datasetLabel}: ${value}`;
+                }
+              }
+            },
+            zoom: {
+              pan: {
+                enabled: true,
+                mode: 'x',
+                modifierKey: 'ctrl'
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                  speed: 0.1
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+                drag: {
+                  enabled: true,
+                  backgroundColor: utils.getThemeColor('--primary-color') + '40',
+                  borderColor: utils.getThemeColor('--primary-color'),
+                  borderWidth: 1
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: utils.getThemeColor('--accent-color') + '40'
+              },
+              ticks: {
+                color: utils.getThemeColor('--text-secondary')
+              }
+            },
+            y: {
+              grid: {
+                color: utils.getThemeColor('--accent-color') + '40'
+              },
+              ticks: {
+                color: utils.getThemeColor('--text-secondary'),
+                callback: (value) => `$${value.toLocaleString()}`
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          }
+        }
+      });
+    }
+
+    function saveScenario() {
+      const simRisk = parseFloat(document.getElementById('simulateRisk').value);
+      const simReward = parseFloat(document.getElementById('simulateReward').value);
+      const simStartBalance = parseFloat(document.getElementById('simulatedStartBalance').value);
+      
+      const scenario = simulateScenario(simStartBalance, simRisk, simReward);
+      
+      const scenarioData = {
+        id: Date.now(),
+        name: `$${simStartBalance.toLocaleString()} (${simRisk}%/${simReward}%)`,
+        startBalance: simStartBalance,
+        riskPercent: simRisk,
+        rewardPercent: simReward,
+        date: new Date().toISOString(),
+        tradeCount: state.simulationTradeSequence.length,
+        finalBalance: scenario.finalBalance,
+        winRate: scenario.winRate,
+        totalPnL: scenario.totalPnL
+      };
+      
+      state.savedScenarios.push(scenarioData);
+      saveToStorage();
+      
+      utils.showToast('Scenario saved successfully', 'success');
+    }
+
+    function compareScenarios() {
+      utils.openModal('scenarioModal');
+      updateScenarioComparisonTable();
+    }
+
+    function updateScenarioComparisonTable() {
+      const tbody = document.getElementById('scenarioComparisonTable');
+      if (!tbody) return;
+      
+      // Include original and current simulated scenarios
+      const allScenarios = [
+        {
+          id: 'original',
+          name: 'Original',
+          startBalance: state.startingBalance,
+          riskPercent: state.riskPercent,
+          rewardPercent: state.rewardPercent,
+          finalBalance: state.currentBalance,
+          totalPnL: state.currentBalance - state.startingBalance,
+          winRate: state.wins + state.losses > 0 ? (state.wins / (state.wins + state.losses) * 100) : 0
+        },
+        ...state.savedScenarios
+      ];
+      
+      tbody.innerHTML = '';
+      
+      allScenarios.forEach((scenario, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-medium">${scenario.name}</td>
+          <td>${utils.formatCurrency(scenario.startBalance)}</td>
+          <td>${scenario.riskPercent}% / ${scenario.rewardPercent}%</td>
+          <td class="font-bold">${utils.formatCurrency(scenario.finalBalance)}</td>
+          <td class="${scenario.totalPnL >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">
+            ${utils.formatCurrency(scenario.totalPnL)}
+          </td>
+          <td>${scenario.winRate.toFixed(2)}%</td>
+          <td>
+            ${scenario.id !== 'original' ? `
+              <button onclick="deleteSavedScenario(${scenario.id})" class="w-8 h-8 rounded-lg hover:bg-red-500/20 text-red-500 flex items-center justify-center mr-2">
+                <i class="fas fa-trash text-sm"></i>
+              </button>
+            ` : ''}
+            <button onclick="loadScenario(${scenario.id})" class="w-8 h-8 rounded-lg hover:bg-[var(--primary-color)]/20 text-[var(--primary-color)] flex items-center justify-center">
+              <i class="fas fa-upload text-sm"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function loadScenario(scenarioId) {
+      if (scenarioId === 'original') {
+        // Load original parameters
+        document.getElementById('simulatedStartBalance').value = state.startingBalance;
+        document.getElementById('simulateRisk').value = state.riskPercent;
+        document.getElementById('simulateReward').value = state.rewardPercent;
+      } else {
+        const scenario = state.savedScenarios.find(s => s.id === scenarioId);
+        if (scenario) {
+          document.getElementById('simulatedStartBalance').value = scenario.startBalance;
+          document.getElementById('simulateRisk').value = scenario.riskPercent;
+          document.getElementById('simulateReward').value = scenario.rewardPercent;
+          state.simulatedStartBalance = scenario.startBalance;
+        }
+      }
+      
+      runSimulation();
+      utils.closeModal('scenarioModal');
+    }
+
+    function deleteSavedScenario(scenarioId) {
+      state.savedScenarios = state.savedScenarios.filter(s => s.id !== scenarioId);
+      saveToStorage();
+      updateScenarioComparisonTable();
+      utils.showToast('Scenario deleted', 'success');
+    }
+
+    function addNewScenario() {
+      const name = prompt('Enter scenario name:', `Custom Scenario ${state.savedScenarios.length + 1}`);
+      if (!name) return;
+      
+      const startBalance = parseFloat(prompt('Enter starting balance:', '1000'));
+      if (isNaN(startBalance) || startBalance <= 0) {
+        utils.showToast('Invalid starting balance', 'error');
+        return;
+      }
+      
+      const risk = parseFloat(prompt('Enter risk percentage:', '5'));
+      if (isNaN(risk) || risk <= 0 || risk > 100) {
+        utils.showToast('Invalid risk percentage', 'error');
+        return;
+      }
+      
+      const reward = parseFloat(prompt('Enter reward percentage:', '10'));
+      if (isNaN(reward) || reward <= 0 || reward > 100) {
+        utils.showToast('Invalid reward percentage', 'error');
+        return;
+      }
+      
+      const scenario = simulateScenario(startBalance, risk, reward);
+      
+      const scenarioData = {
+        id: Date.now(),
+        name,
+        startBalance,
+        riskPercent: risk,
+        rewardPercent: reward,
+        date: new Date().toISOString(),
+        tradeCount: state.simulationTradeSequence.length,
+        finalBalance: scenario.finalBalance,
+        winRate: scenario.winRate,
+        totalPnL: scenario.totalPnL
+      };
+      
+      state.savedScenarios.push(scenarioData);
+      saveToStorage();
+      updateScenarioComparisonTable();
+      
+      utils.showToast('Custom scenario added', 'success');
+    }
+
+    function exportAllScenarios() {
+      const data = {
+        scenarios: state.savedScenarios,
+        tradeSequence: state.simulationTradeSequence,
+        exportDate: new Date().toISOString()
+      };
+      
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trading-scenarios-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      utils.showToast('All scenarios exported', 'success');
+    }
+
+    function resetSimulation() {
+      document.getElementById('simulateRisk').value = '15';
+      document.getElementById('simulateReward').value = '30';
+      document.getElementById('simulatedStartBalance').value = '100';
+      state.simulatedStartBalance = 100;
+      
+      document.getElementById('simulationResults').classList.add('hidden');
+      
+      if (state.charts.simulationChart) {
+        state.charts.simulationChart.destroy();
+        state.charts.simulationChart = null;
+      }
+      
+      saveToStorage();
+      utils.showToast('Simulation reset', 'info');
+    }
+
+    // ====== Report Functions ======
+    function generateReport() {
+      const monthInput = document.getElementById('reportCalendar').value;
+      if (!monthInput) {
+        utils.showToast('Please select a month', 'error');
+        return;
+      }
+      
+      const [year, month] = monthInput.split('-');
+      const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+      
+      // Filter trades for selected month
+      const monthTrades = state.tradeHistory.filter(t => {
+        const tradeDate = new Date(t.timestamp);
+        return tradeDate.getFullYear() === parseInt(year) && 
+               tradeDate.getMonth() + 1 === parseInt(month);
+      });
+      
+      if (monthTrades.length === 0) {
+        document.getElementById('reportResult').innerHTML = `
+          <div class="text-center py-8 text-[var(--text-secondary)]">
+            No trades found for ${monthName} ${year}
+          </div>
+        `;
+        return;
+      }
+      
+      // Calculate statistics
+      const wins = monthTrades.filter(t => t.type === 'win').length;
+      const losses = monthTrades.filter(t => t.type === 'loss').length;
+      const totalProfit = monthTrades.filter(t => t.type === 'win').reduce((sum, t) => sum + t.amount, 0);
+      const totalLoss = monthTrades.filter(t => t.type === 'loss').reduce((sum, t) => sum + t.amount, 0);
+      const netPnL = totalProfit - totalLoss;
+      const winRate = monthTrades.length > 0 ? (wins / monthTrades.length * 100) : 0;
+      
+      // Update report result
+      document.getElementById('reportResult').innerHTML = `
+        <div class="card-modern p-8 mb-8">
+          <h3 class="text-xl font-bold mb-6">${monthName} ${year} Performance Report</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Total Trades</div>
+              <div class="text-2xl font-bold">${monthTrades.length}</div>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Win Rate</div>
+              <div class="text-2xl font-bold ${winRate >= 50 ? 'text-green-500' : 'text-yellow-500'}">
+                ${winRate.toFixed(2)}%
+              </div>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Net P&L</div>
+              <div class="text-2xl font-bold ${netPnL >= 0 ? 'text-green-500' : 'text-red-500'}">
+                ${utils.formatCurrency(netPnL)}
+              </div>
+            </div>
+            <div class="text-center p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900">
+              <div class="text-sm text-[var(--text-secondary)] mb-2">Profit Factor</div>
+              <div class="text-2xl font-bold">
+                ${totalLoss > 0 ? (totalProfit / totalLoss).toFixed(2) : 'N/A'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Update charts
+      updateReportCharts(wins, losses, totalProfit, totalLoss);
+      
+      utils.showToast('Report generated successfully', 'success');
+    }
+
+    function updateReportCharts(wins, losses, totalProfit, totalLoss) {
+      // Pie chart for win/loss distribution
+      const pieCtx = document.getElementById('reportPie')?.getContext('2d');
+      if (pieCtx) {
+        if (state.charts.reportPie) {
+          state.charts.reportPie.destroy();
+        }
+        
+        state.charts.reportPie = new Chart(pieCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Wins', 'Losses'],
+            datasets: [{
+              data: [wins, losses],
+              backgroundColor: [
+                utils.getThemeColor('--success-color'),
+                utils.getThemeColor('--danger-color')
+              ],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: utils.getThemeColor('--text-primary'),
+                  padding: 20
+                }
+              }
+            }
+          }
+        });
+      }
+      
+      // Bar chart for profit/loss
+      const barCtx = document.getElementById('reportBar')?.getContext('2d');
+      if (barCtx) {
+        if (state.charts.reportBar) {
+          state.charts.reportBar.destroy();
+        }
+        
+        state.charts.reportBar = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Profit', 'Loss', 'Net'],
+            datasets: [{
+              data: [totalProfit, totalLoss, totalProfit - totalLoss],
+              backgroundColor: [
+                utils.getThemeColor('--success-color'),
+                utils.getThemeColor('--danger-color'),
+                totalProfit - totalLoss >= 0 ? 
+                  utils.getThemeColor('--success-color') : 
+                  utils.getThemeColor('--danger-color')
+              ],
+              borderWidth: 0,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: utils.getThemeColor('--text-primary')
+                }
+              },
+              y: {
+                grid: {
+                  color: utils.getThemeColor('--accent-color') + '40'
+                },
+                ticks: {
+                  color: utils.getThemeColor('--text-secondary'),
+                  callback: (value) => `$${value.toLocaleString()}`
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    function downloadPDF() {
+      utils.showToast('PDF export would be implemented here', 'info');
+    }
+
+    function downloadXLSX() {
+      utils.showToast('Excel export would be implemented here', 'info');
+    }
+
+    function generateInsights() {
+      if (state.tradeHistory.length === 0) {
+        utils.showToast('No trade data to analyze', 'warning');
+        return;
+      }
+      
+      // Simple insights based on trading patterns
+      const insights = [];
+      
+      // Win rate insight
+      const winRate = (state.wins / state.tradeCount * 100);
+      if (winRate < 40) {
+        insights.push('Your win rate is below 40%. Consider improving your entry timing or tightening stop losses.');
+      } else if (winRate > 60) {
+        insights.push('Great win rate! Consider increasing position size cautiously.');
+      }
+      
+      // Consecutive losses insight
+      let maxConsecutiveLosses = 0;
+      let currentStreak = 0;
+      state.tradeHistory.forEach(trade => {
+        if (trade.type === 'loss') {
+          currentStreak++;
+          if (currentStreak > maxConsecutiveLosses) {
+            maxConsecutiveLosses = currentStreak;
+          }
+        } else {
+          currentStreak = 0;
+        }
+      });
+      
+      if (maxConsecutiveLosses >= 3) {
+        insights.push(`You had ${maxConsecutiveLosses} consecutive losses. Consider reducing position size after 2 consecutive losses.`);
+      }
+      
+      // Risk management insight
+      if (state.riskPercent > 5) {
+        insights.push('High risk percentage detected. For long-term sustainability, consider keeping risk below 2% per trade.');
+      }
+      
+      // Display insights
+      if (insights.length > 0) {
+        const insightsHTML = insights.map(insight => 
+          `<div class="p-4 mb-3 rounded-xl bg-white/5 border-l-4 border-[var(--primary-color)]">
+            <i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>
+            ${insight}
+          </div>`
+        ).join('');
+        
+        document.getElementById('reportResult').innerHTML += `
+          <div class="mt-8">
+            <h4 class="text-lg font-bold mb-4">AI Trading Insights</h4>
+            ${insightsHTML}
+          </div>
+        `;
+      }
+      
+      utils.showToast('AI insights generated', 'success');
+    }
+
+    // ====== Tab Navigation ======
+    function showTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+        tab.classList.remove('animate-fade-in');
+      });
+      
+      // Show selected tab
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+        selectedTab.classList.add('animate-fade-in');
+      }
+      
+      // Update active tab button
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const activeButton = document.querySelector(`.tab-button[onclick*="${tabId}"]`);
+      if (activeButton) {
+        activeButton.classList.add('active');
+      }
+      
+      // Update mobile nav
+      const mobileNav = document.getElementById('mobileNav');
+      if (mobileNav && !mobileNav.classList.contains('hidden')) {
+        mobileNav.classList.add('hidden');
+      }
+      
+      // Update charts if needed
+      if (tabId === 'tradeHistoryTab') {
+        setTimeout(() => updateBalanceChart(), 100);
+      }
+      
+      if (tabId === 'scenarioTab') {
+        updateSimulatorInfo();
+      }
+    }
+
+    // ====== Modal Functions ======
+    function showResetConfirmation() {
+      utils.openModal('resetModal');
+    }
+
+    function resetTrading() {
+      state.startingBalance = parseFloat(document.getElementById('startingBalance').value);
+      state.currentBalance = state.startingBalance;
+      state.wins = 0;
+      state.losses = 0;
+      state.tradeCount = 0;
+      state.tradeHistory = [];
+      state.simulationTradeSequence = [];
+      
+      // Update system
+      state.tradingSystems[state.currentSystem] = {
+        ...state.tradingSystems[state.currentSystem],
+        startingBalance: state.startingBalance,
+        currentBalance: state.currentBalance,
+        wins: 0,
+        losses: 0,
+        tradeCount: 0,
+        tradeHistory: []
+      };
+      
+      // Hide trade controls
+      document.getElementById('tradeControls').style.display = 'none';
+      document.getElementById('initPrompt').style.display = 'block';
+      
+      // Update displays
+      updateAllDisplays();
+      updateTradeHistoryTable();
+      updateJournalTable();
+      updateSimulatorInfo();
+      
+      // Close modal and save
+      utils.closeModal('resetModal');
+      saveToStorage();
+      
+      utils.showToast('Trading data reset successfully', 'success');
+    }
+
+    function importData() {
+      utils.openModal('importModal');
+    }
+
+    function processImport() {
+      const fileInput = document.getElementById('importFile');
+      const textInput = document.getElementById('importDataText');
+      
+      let importData;
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          try {
+            importData = JSON.parse(e.target.result);
+            loadImportedData(importData);
+          } catch (error) {
+            utils.showToast('Invalid JSON file', 'error');
+          }
+        };
+        
+        reader.readAsText(file);
+      } else if (textInput.value.trim()) {
+        try {
+          importData = JSON.parse(textInput.value);
+          loadImportedData(importData);
+        } catch (error) {
+          utils.showToast('Invalid JSON data', 'error');
+        }
+      } else {
+        utils.showToast('Please select a file or paste data', 'error');
+      }
+    }
+
+    function loadImportedData(data) {
+      try {
+        // Update state with imported data
+        Object.assign(state, {
+          currentBalance: data.currentBalance || 10000,
+          startingBalance: data.startingBalance || 10000,
+          wins: data.wins || 0,
+          losses: data.losses || 0,
+          tradeCount: data.tradeCount || 0,
+          tradeHistory: data.tradeHistory || [],
+          targetBalance: data.targetBalance || 10800,
+          riskPercent: data.riskPercent || 1,
+          rewardPercent: data.rewardPercent || 2,
+          simulatedStartBalance: data.simulatedStartBalance || 100,
+          tradingSystems: data.tradingSystems || state.tradingSystems,
+          currentSystem: data.currentSystem || 'default',
+          savedScenarios: data.savedScenarios || state.savedScenarios
+        });
+        
+        // Update simulation sequence
+        if (state.tradeHistory.length > 0) {
+          state.simulationTradeSequence = state.tradeHistory.map(t => t.type);
+        }
+        
+        // Update inputs
+        document.getElementById('startingBalance').value = state.startingBalance;
+        document.getElementById('targetBalance').value = state.targetBalance;
+        document.getElementById('riskPercent').value = state.riskPercent;
+        document.getElementById('rewardPercent').value = state.rewardPercent;
+        document.getElementById('simulatedStartBalance').value = state.simulatedStartBalance;
+        
+        // Update system dropdown
+        updateSystemDropdown();
+        
+        // Show trade controls if we have data
+        if (state.tradeCount > 0) {
+          document.getElementById('tradeControls').style.display = 'block';
+          document.getElementById('initPrompt').style.display = 'none';
+        }
+        
+        // Update all displays
+        updateAllDisplays();
+        updateTradeHistoryTable();
+        updateJournalTable();
+        updateSimulatorInfo();
+        
+        // Save to storage
+        saveToStorage();
+        
+        // Close modal
+        utils.closeModal('importModal');
+        
+        utils.showToast('Data imported successfully', 'success');
+      } catch (error) {
+        console.error('Error importing data:', error);
+        utils.showToast('Error importing data', 'error');
+      }
+    }
+
+    function exportData() {
+      // Create a clean export object
+      const exportData = {
+        currentBalance: state.currentBalance,
+        startingBalance: state.startingBalance,
+        wins: state.wins,
+        losses: state.losses,
+        tradeCount: state.tradeCount,
+        tradeHistory: state.tradeHistory,
+        targetBalance: state.targetBalance,
+        riskPercent: state.riskPercent,
+        rewardPercent: state.rewardPercent,
+        simulatedStartBalance: state.simulatedStartBalance,
+        tradingSystems: state.tradingSystems,
+        currentSystem: state.currentSystem,
+        savedScenarios: state.savedScenarios,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+      };
+      
+      // Convert to JSON
+      const dataStr = JSON.stringify(exportData, null, 2);
+      
+      // Create download link
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tradetracker-export-${new Date().toISOString().slice(0,10)}.json`;
+      
+      // Trigger download
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      utils.showToast('Data exported successfully', 'success');
+    }
+
+    // ====== Demo Functions ======
+    function showDemo() {
+      utils.showToast('Interactive demo would play here', 'info');
+    }
+
+    // ====== Journal Functions ======
+    function updateJournalTable() {
+      const tbody = document.getElementById('journalBody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (state.tradeHistory.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-8 text-[var(--text-secondary)]">
+              No journal entries yet
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Add journal entries (newest first)
+      state.tradeHistory.slice().reverse().forEach((trade, reverseIndex) => {
+        const tradeIndex = state.tradeHistory.length - 1 - reverseIndex;
+        const tradeNumber = tradeIndex + 1;
+        const date = new Date(trade.timestamp);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+        const formattedTime = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const screenshotHTML = trade.screenshot ? `
+          <div class="flex flex-col items-center gap-2">
+            <img src="${trade.screenshot}" 
+                 alt="Trade screenshot" 
+                 class="w-20 h-12 object-cover rounded-lg cursor-pointer border border-white/10 hover:border-[var(--primary-color)] transition"
+                 onclick="showScreenshot(${tradeIndex})">
+            <button onclick="removeScreenshot(${tradeIndex})" class="text-xs px-2 py-1 rounded bg-red-500/20 text-red-500 hover:bg-red-500/30">
+              Remove
+            </button>
+          </div>
+        ` : `
+          <div class="flex flex-col items-center gap-2">
+            <span class="text-xs text-[var(--text-secondary)]">No screenshot</span>
+            <input type="file" 
+                   id="screenshotInput-${tradeIndex}" 
+                   class="hidden" 
+                   accept="image/*"
+                   onchange="uploadScreenshot(${tradeIndex}, this)">
+            <button onclick="document.getElementById('screenshotInput-${tradeIndex}').click()" 
+                    class="text-xs px-2 py-1 rounded bg-[var(--primary-color)]/20 text-[var(--primary-color)] hover:bg-[var(--primary-color)]/30">
+              Upload
+            </button>
+          </div>
+        `;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="font-medium">${tradeNumber}</td>
+          <td>
+            <span class="badge ${trade.type === 'win' ? 'badge-success' : 'badge-danger'}">
+              ${trade.type.toUpperCase()}
+            </span>
+          </td>
+          <td>
+            <div class="text-sm">${formattedDate}</div>
+            <div class="text-xs text-[var(--text-secondary)]">${formattedTime}</div>
+          </td>
+          <td>${utils.formatCurrency(trade.balanceBefore)}</td>
+          <td>
+            <span class="${trade.type === 'win' ? 'text-green-500' : 'text-red-500'}">
+              ${trade.type === 'win' ? '+' : '-'}${trade.type === 'win' ? state.rewardPercent : state.riskPercent}%
+            </span>
+          </td>
+          <td class="font-bold">${utils.formatCurrency(trade.balanceAfter)}</td>
+          <td>${screenshotHTML}</td>
+          <td>
+            <div class="min-w-[300px]">
+              <textarea 
+                id="trade-note-${tradeIndex}" 
+                class="input-modern" 
+                rows="3"
+                placeholder="Add notes about this trade..."
+                onchange="saveTradeNote(${tradeIndex})"
+                onblur="saveTradeNote(${tradeIndex})">${trade.note || ''}</textarea>
+              <div class="text-xs text-[var(--text-secondary)] mt-1 text-right">
+                <span id="trade-note-${tradeIndex}-count">${trade.note ? trade.note.length : 0}</span> characters
+              </div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+        
+        // Add character count update
+        const textarea = document.getElementById(`trade-note-${tradeIndex}`);
+        const countElement = document.getElementById(`trade-note-${tradeIndex}-count`);
+        if (textarea && countElement) {
+          textarea.addEventListener('input', () => {
+            countElement.textContent = textarea.value.length;
+          });
+        }
+      });
+    }
+
+    function uploadScreenshot(tradeIndex, input) {
+      if (!input.files || input.files.length === 0) return;
+      
+      const file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        utils.showToast('File must be less than 5MB', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        state.tradeHistory[tradeIndex].screenshot = e.target.result;
+        saveToStorage();
+        updateJournalTable();
+        utils.showToast('Screenshot uploaded successfully', 'success');
+        input.value = '';
+      };
+      reader.onerror = () => {
+        utils.showToast('Error reading file', 'error');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeScreenshot(tradeIndex) {
+      if (confirm('Remove screenshot?')) {
+        state.tradeHistory[tradeIndex].screenshot = null;
+        saveToStorage();
+        updateJournalTable();
+        utils.showToast('Screenshot removed', 'success');
+      }
+    }
+
+    function showScreenshot(tradeIndex) {
+      const trade = state.tradeHistory[tradeIndex];
+      if (!trade || !trade.screenshot) return;
+      
+      document.getElementById('modalScreenshot').src = trade.screenshot;
+      document.getElementById('modalTradeNote').textContent = trade.note || 'No notes for this trade';
+      utils.openModal('screenshotModal');
+    }
+
+    function saveTradeNote(tradeIndex) {
+      const textarea = document.getElementById(`trade-note-${tradeIndex}`);
+      if (!textarea) return;
+      
+      state.tradeHistory[tradeIndex].note = textarea.value;
+      saveToStorage();
+      utils.showToast('Note saved', 'success');
+    }
+
+    // ====== Global Export (for onclick handlers) ======
+    window.showTab = showTab;
+    window.toggleMobileNav = toggleMobileNav;
+    window.showSystemModal = showSystemModal;
+    window.initTrading = initTrading;
+    window.recordTrade = recordTrade;
+    window.showResetConfirmation = showResetConfirmation;
+    window.resetTrading = resetTrading;
+    window.importData = importData;
+    window.processImport = processImport;
+    window.exportData = exportData;
+    window.addSystem = addSystem;
+    window.deleteSystem = deleteSystem;
+    window.switchSystem = switchSystem;
+    window.setScenario = setScenario;
+    window.runSimulation = runSimulation;
+    window.saveScenario = saveScenario;
+    window.compareScenarios = compareScenarios;
+    window.addNewScenario = addNewScenario;
+    window.deleteSavedScenario = deleteSavedScenario;
+    window.loadScenario = loadScenario;
+    window.resetSimulation = resetSimulation;
+    window.generateReport = generateReport;
+    window.generateInsights = generateInsights;
+    window.downloadPDF = downloadPDF;
+    window.downloadXLSX = downloadXLSX;
+    window.applyFilters = applyFilters;
+    window.clearFilters = clearFilters;
+    window.removeTrade = removeTrade;
+    window.uploadScreenshot = uploadScreenshot;
+    window.removeScreenshot = removeScreenshot;
+    window.showScreenshot = showScreenshot;
+    window.saveTradeNote = saveTradeNote;
+    window.closeModal = utils.closeModal;
+    window.showDemo = showDemo;
+    window.zoomChart = zoomChart;
+    window.resetZoomChart = resetZoomChart;
+  </script>
+</body>
+</html>
